@@ -1,4 +1,4 @@
-# SaikoUniversity.Application
+﻿# SaikoUniversity.Application
 
 ## Purpose
 

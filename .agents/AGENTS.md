@@ -1,4 +1,4 @@
-# .agents — Agent Assets
+﻿# .agents — Agent Assets
 
 ## Purpose
 

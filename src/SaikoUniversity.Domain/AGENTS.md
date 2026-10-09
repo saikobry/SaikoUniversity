@@ -1,4 +1,4 @@
-# SaikoUniversity.Domain
+﻿# SaikoUniversity.Domain
 
 ## Purpose
 

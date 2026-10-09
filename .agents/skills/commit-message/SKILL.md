@@ -1,4 +1,4 @@
----
+﻿---
 name: commit-message
 description: Generate conventional commit messages from staged changes using "go" or /commit-message
 ---

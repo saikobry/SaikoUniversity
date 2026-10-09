@@ -1,4 +1,4 @@
-# SaikoUniversity.Api
+﻿# SaikoUniversity.Api
 
 ## Purpose
 

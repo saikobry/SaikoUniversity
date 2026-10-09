@@ -1,4 +1,4 @@
-# SaikoUniversity — DOX Rail
+﻿# SaikoUniversity — DOX Rail
 
 ## Purpose
 
@@ -46,10 +46,16 @@ Rules:
 
 ### Secrets
 
-- `.env` is gitignored and holds only local container secrets.
+- `.env` is gitignored and holds local container secrets.
 - `.env.example` is committed and documents every variable with no value.
-- Connection strings live in `appsettings*.json`, never in code.
-- Production credentials come from Azure Key Vault, not from files in the repo.
+- **The Development connection string is committed on purpose.**
+  `appsettings.Development.json` holds the localhost Compose credentials (`sa` / `Dev!Pass123`)
+  so a fresh clone runs with one command. It is a throwaway password for a local container that
+  exists to be disposable, not a secret.
+- Production credentials come from Azure Key Vault. Never commit a non-local connection string,
+  an API key, or a token, regardless of environment.
+- A credential that would still be sensitive if the container were destroyed belongs in `.env` or
+  user secrets, not in a tracked JSON file.
 
 ### Build
 
@@ -72,15 +78,22 @@ Rules:
   It never stages and never commits.
 - Prefer role-based type names: `AppDbContext`, not `SaikoUniversityDbContext`.
 - Keep `bin/` and `obj/` out of every doc's scope.
+- Repository scripts live in `scripts/tools/`, use lowercase kebab-case `.ps1` filenames, resolve the
+  repo root from `$PSScriptRoot`, set `$ErrorActionPreference = 'Stop'`, and are safe to re-run.
+  They invoke tools with the command name that exists on a plain Windows install, not a pwsh-only
+  one. Verb-Noun naming applies to functions inside a script, never to a filename.
 
 ## Verification
 
 - Build: `dotnet build SaikoUniversity.slnx`
 - Tests: `dotnet test SaikoUniversity.slnx`
 - Database health: `docker compose ps` reports `healthy` for `saiko-uni-sql`
+- Whitespace: `powershell -ExecutionPolicy Bypass -File scripts/tools/clean-whitespace.ps1`
+- OpenAPI snapshot: `powershell -ExecutionPolicy Bypass -File scripts/tools/update-openapi.ps1`
 
 ## Child DOX Index
 
 - `.agents/` — agent skills and agent-instruction assets checked into the repo
 - `src/` — all production .NET projects and the layering contract between them
 - `tests/` — one test project per src layer, plus shared test infrastructure
+- `scripts/` — repository tooling, with its own naming and authoring rules

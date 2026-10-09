@@ -1,4 +1,4 @@
-# SaikoUniversity.Infrastructure
+﻿# SaikoUniversity.Infrastructure
 
 ## Purpose
 
