@@ -24,5 +24,24 @@ services:
       start_period: 30s
     restart: unless-stopped
 
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: saiko-university-api:${IMAGE_TAG:-local}
+    container_name: saiko-uni-api
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Development}
+      # Inside the container network the SQL container is reachable as `sql`, not `localhost`.
+      # The double underscore maps this to the ConnectionStrings:Default key.
+      ConnectionStrings__Default: >-
+        Server=sql,1433;Database=SaikoUniversity;User Id=sa;Password=${MSSQL_SA_PASSWORD:?set MSSQL_SA_PASSWORD in .env};TrustServerCertificate=True;Encrypt=False
+    ports:
+      - "${API_PORT:-5080}:8080"
+    depends_on:
+      sql:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   saiko-uni-mssql:

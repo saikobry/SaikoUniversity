@@ -1,0 +1,37 @@
+# Version control
+.git
+.gitignore
+.github
+
+# Secrets
+.env
+*.user
+*.suo
+
+# Build output - the image builds from source
+**/bin
+**/obj
+artifacts
+
+# Tests are not shipped in the API image
+tests
+
+# Tooling and docs
+scripts
+docs
+*.md
+!README.md
+
+# Local config
+docker-compose.yml
+docker-compose.*.yml
+Dockerfile
+.dockerignore
+
+# Editor and OS noise
+.vs
+.vscode
+.idea
+**/.vs
+Thumbs.db
+.DS_Store
