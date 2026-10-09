@@ -3,9 +3,16 @@ using SaikoUniversity.Infrastructure;
 using SaikoUniversity.Infrastructure.Persistence;
 using Scalar.AspNetCore;
 
+// Maintenance commands run as a separate process and never start the web host.
+if (args.Length > 0 && args[0] is "seed" or "migrate")
+{
+    return await SaikoUniversity.Api.DatabaseCommand.RunAsync(args);
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
+builder.Services.AddControllers();
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
@@ -21,6 +28,8 @@ if (app.Environment.IsDevelopment())
         options.WithTitle("Saiko University API").WithTheme(ScalarTheme.BluePlanet));
 }
 
+app.MapControllers();
+
 app.MapHealthChecks("/health");
 
 app.MapGet("/", () => Results.Ok(new
@@ -32,5 +41,7 @@ app.MapGet("/", () => Results.Ok(new
 }));
 
 app.Run();
+
+return 0;
 
 public partial class Program;
