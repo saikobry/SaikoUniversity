@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>SaikoUniversity.Application.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SaikoUniversity.Application\SaikoUniversity.Application.csproj" />
+    <ProjectReference Include="..\..\src\SaikoUniversity.Domain\SaikoUniversity.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>SaikoUniversity.Api.Tests</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
+    <PackageReference Include="FluentAssertions" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\SaikoUniversity.Api\SaikoUniversity.Api.csproj" />
+    <ProjectReference Include="..\..\src\SaikoUniversity.Infrastructure\SaikoUniversity.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\SaikoUniversity.Application\SaikoUniversity.Application.csproj" />
+    <ProjectReference Include="..\..\src\SaikoUniversity.Domain\SaikoUniversity.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

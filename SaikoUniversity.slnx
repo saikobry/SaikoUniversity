@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SaikoUniversity.Api/SaikoUniversity.Api.csproj" />
+    <Project Path="src/SaikoUniversity.Application/SaikoUniversity.Application.csproj" />
+    <Project Path="src/SaikoUniversity.Domain/SaikoUniversity.Domain.csproj" />
+    <Project Path="src/SaikoUniversity.Infrastructure/SaikoUniversity.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SaikoUniversity.Api.Tests/SaikoUniversity.Api.Tests.csproj" />
+    <Project Path="tests/SaikoUniversity.Application.Tests/SaikoUniversity.Application.Tests.csproj" />
+    <Project Path="tests/SaikoUniversity.Domain.Tests/SaikoUniversity.Domain.Tests.csproj" />
+    <Project Path="tests/SaikoUniversity.Infrastructure.Tests/SaikoUniversity.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>
