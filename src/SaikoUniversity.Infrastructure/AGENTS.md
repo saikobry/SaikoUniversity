@@ -49,8 +49,9 @@ implementations of the ports declared in `Application`.
 ### Seeding
 
 - `DevelopmentSeeder` runs only when the environment is Development.
-- Seed deterministic, realistic data: Japanese faculty names, realistic student numbers, plausible
-  Japanese and international student mix.
+- Seed deterministic, realistic data: plausible faculty names, well-formed student numbers, and a
+  believable mix of domestic and international students. The institution is fictional, so the data
+  must stay internally consistent without claiming to represent a real school.
 - Seeding is idempotent. It must be safe to run on every startup.
 
 ### Connection strings
