@@ -61,8 +61,6 @@ public sealed class AcademicProgram : Entity
 
     public CreditBasis CreditBasis { get; private set; }
 
-    public bool IsDeleted { get; private set; }
-
     /// <summary>
     /// True when the program may accept students. Both conditions are required: the program must
     /// be active and recognized.
@@ -80,6 +78,4 @@ public sealed class AcademicProgram : Entity
     public void Retire() => Lifecycle = ProgramLifecycle.Retired;
 
     public void Reinstate() => Lifecycle = ProgramLifecycle.Active;
-
-    public void SoftDelete() => IsDeleted = true;
 }

@@ -101,12 +101,16 @@ public sealed class AcademicProgramTests
     }
 
     [Fact]
-    public void SoftDelete_SetsIsDeleted()
+    public void Retire_KeepsProgramVisible_ByLeavingLifecycleAsTheOnlyState()
     {
+        // Retirement is the mechanism for stopping intake. There is no soft delete: a retired
+        // program must stay visible to reports and transcripts, so hiding it behind a query filter
+        // would be wrong. Rows are only removed when nothing references them.
         var program = CreateProgram();
 
-        program.SoftDelete();
+        program.Retire();
 
-        program.IsDeleted.Should().BeTrue();
+        program.Lifecycle.Should().Be(ProgramLifecycle.Retired);
+        program.CanAcceptStudents.Should().BeFalse();
     }
 }

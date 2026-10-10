@@ -110,11 +110,7 @@ public sealed class ProgramsController(ProgramService programs) : ControllerBase
             return ToActionResult(result.Error!);
         }
 
-        // Re-read so the response carries the level code and department name the update path does
-        // not load.
-        var updated = await programs.GetByIdAsync(id, cancellationToken);
-
-        return Ok(ProgramResponse.From(updated!));
+        return Ok(ProgramResponse.From(result.Value!));
     }
 
     private ActionResult ToActionResult(Error error) => error.Code switch

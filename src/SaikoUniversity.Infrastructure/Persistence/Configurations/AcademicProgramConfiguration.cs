@@ -43,10 +43,6 @@ public sealed class AcademicProgramConfiguration : IEntityTypeConfiguration<Acad
             .HasDefaultValue(false)
             .IsRequired();
 
-        builder.Property(x => x.IsDeleted)
-            .HasDefaultValue(false)
-            .IsRequired();
-
         builder.Property(x => x.RequiredCredits)
             .IsRequired();
 
@@ -72,8 +68,8 @@ public sealed class AcademicProgramConfiguration : IEntityTypeConfiguration<Acad
             .OnDelete(DeleteBehavior.Restrict)
             .IsRequired();
 
-        // Soft-deleted programs stay in the table and must not surface in normal queries. The
-        // interceptor converts Remove into a soft delete; this filter is the read side of that.
-        builder.HasQueryFilter(x => !x.IsDeleted);
+        // No query filter. A program is retired, not hidden, so it stays visible to reports and
+        // transcripts. Rows are only removed when nothing references them, which the Restrict
+        // foreign keys above enforce.
     }
 }

@@ -81,11 +81,6 @@ namespace SaikoUniversity.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("DepartmentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false);
-
                     b.Property<bool>("IsRegulatorRecognised")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")

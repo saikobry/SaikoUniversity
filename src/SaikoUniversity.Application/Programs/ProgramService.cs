@@ -98,7 +98,11 @@ public sealed class ProgramService(IAppDbContext context)
             return Result<ProgramDto>.Failure(ErrorCode.Unknown, "RequiredCredits must be greater than zero.");
         }
 
+        // Navigations are loaded here so the returned DTO is complete. Returning a DTO with placeholder
+        // values would push the burden onto every caller.
         var program = await context.AcademicPrograms
+            .Include(x => x.AcademicLevel!)
+            .Include(x => x.Department!)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
 
         if (program is null)
@@ -131,20 +135,7 @@ public sealed class ProgramService(IAppDbContext context)
 
         await context.SaveChangesAsync(cancellationToken);
 
-        return Result<ProgramDto>.Success(new ProgramDto(
-            program.Id,
-            program.Code,
-            program.Name,
-            program.AcademicLevelId,
-            string.Empty,
-            program.DepartmentId,
-            string.Empty,
-            program.Regulator.ToString(),
-            program.IsRegulatorRecognised,
-            program.Lifecycle.ToString(),
-            program.RequiredCredits,
-            program.CreditBasis.ToString(),
-            program.CanAcceptStudents));
+        return Result<ProgramDto>.Success(ToDto(program));
     }
 
     /// <summary>

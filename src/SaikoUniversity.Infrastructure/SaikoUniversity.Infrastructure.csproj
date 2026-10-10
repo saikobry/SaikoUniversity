@@ -17,4 +17,8 @@
     <ProjectReference Include="..\SaikoUniversity.Domain\SaikoUniversity.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="SaikoUniversity.Infrastructure.Tests" />
+  </ItemGroup>
+
 </Project>

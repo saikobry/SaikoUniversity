@@ -38,13 +38,22 @@ implementations of the ports declared in `Application`.
 - Migrations run in development via `Database.Migrate()`. Never `EnsureCreated()` — it does not
   track history and will silently conflict with a later migration.
 
-### Auditing and soft delete
+### Auditing and deletion
 
-- `AuditableEntityInterceptor` stamps `CreatedAt`, `UpdatedAt`, and the acting user on change.
-- `SoftDeleteInterceptor` converts `Remove` into `IsDeleted = true` for entities implementing
-  `IAuditable`. This is why students are never hard-deleted.
-- Query filters hide soft-deleted rows. Bypass them only in an explicit admin or audit path, and
-  say so in a comment when you do.
+- `AuditableEntityInterceptor` stamps `CreatedAt` and `UpdatedAt` from `IClock` on every entity
+  deriving from `Entity`. It also clears `CreatedAt` from the modified set so an update never
+  rewrites the creation timestamp.
+- **There is no soft delete.** Do not add `IsDeleted`, `DeletedAt`, a `SoftDeleteInterceptor`, or a
+  global query filter without revisiting this section.
+- Retirement and deletion are different. A program that must stop accepting students is
+  `ProgramLifecycle.Retired`; it stays visible to reports and transcripts. Reference data uses
+  `IsActive`. Rows are only physically removed when a mistake needs undoing and nothing references
+  them, which `DeleteBehavior.Restrict` on every foreign key enforces.
+- Deletion history belongs to the audit log, not to a column on the row. A nullable `DeletedAt`
+  cannot answer "when was this deleted and then restored" once the flag is cleared, and it is a
+  denormalisation of what the log records anyway.
+- `ExecuteDeleteAsync` and raw SQL bypass interceptors entirely. If a deletion guarantee is ever
+  needed, enforce it in the database with `DENY DELETE` for the application role, not in C#.
 
 ### Seeding
 
