@@ -96,7 +96,7 @@ try {
         $apiProcess = Start-Process -FilePath 'dotnet' `
             -ArgumentList @(
                 'run',
-                '--project', 'src/SaikoUniversity.Api',
+                '--project', 'src/Api',
                 '--urls', $BaseUrl,
                 '--no-launch-profile'
             ) `

@@ -4,14 +4,14 @@ FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
 
 COPY Directory.Build.props Directory.Packages.props ./
-COPY src/SaikoUniversity.Domain/SaikoUniversity.Domain.csproj          src/SaikoUniversity.Domain/
-COPY src/SaikoUniversity.Application/SaikoUniversity.Application.csproj src/SaikoUniversity.Application/
-COPY src/SaikoUniversity.Infrastructure/SaikoUniversity.Infrastructure.csproj src/SaikoUniversity.Infrastructure/
-COPY src/SaikoUniversity.Api/SaikoUniversity.Api.csproj                src/SaikoUniversity.Api/
-RUN dotnet restore src/SaikoUniversity.Api/SaikoUniversity.Api.csproj
+COPY src/Domain/Domain.csproj          src/Domain/
+COPY src/Application/Application.csproj src/Application/
+COPY src/Infrastructure/Infrastructure.csproj src/Infrastructure/
+COPY src/Api/Api.csproj                src/Api/
+RUN dotnet restore src/Api/Api.csproj
 
 COPY src/ src/
-RUN dotnet publish src/SaikoUniversity.Api/SaikoUniversity.Api.csproj \
+RUN dotnet publish src/Api/Api.csproj \
     -c Release \
     -o /app/publish \
     --no-restore \
@@ -33,4 +33,4 @@ COPY --from=build /app/publish .
 # Runs unprivileged. The base image ships an `app` user for exactly this.
 USER app
 
-ENTRYPOINT ["dotnet", "SaikoUniversity.Api.dll"]
+ENTRYPOINT ["dotnet", "Api.dll"]
