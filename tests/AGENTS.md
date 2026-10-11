@@ -1,4 +1,4 @@
-﻿# tests — Test Suites
+# tests — Test Suites
 
 ## Purpose
 
@@ -17,10 +17,10 @@ exactly as much of the system as it needs to exercise.
 
 | Test project | Covers | Can reference |
 |---|---|---|
-| `SaikoUniversity.Domain.Tests` | Entities, value objects, invariants | `Domain` only |
-| `SaikoUniversity.Application.Tests` | Use-case services, DTO mapping | `Application`, `Domain` |
-| `SaikoUniversity.Infrastructure.Tests` | EF configuration, migrations, interceptors | `Infrastructure`, `Application`, `Domain` |
-| `SaikoUniversity.Api.Tests` | Endpoints, middleware, composition | all four |
+| `Domain.Tests` | Entities, value objects, invariants | `Domain` only |
+| `Application.Tests` | Use-case services, DTO mapping | `Application`, `Domain` |
+| `Infrastructure.Tests` | EF configuration, migrations, interceptors | `Infrastructure`, `Application`, `Domain` |
+| `Api.Tests` | Endpoints, middleware, composition | all four |
 
 - A test project never references a layer it does not test. `Domain.Tests` cannot touch EF Core.
 - Test-only helper types are `internal` and exposed to tests via `InternalsVisibleTo`, never `public`
@@ -40,7 +40,7 @@ exactly as much of the system as it needs to exercise.
 - `Infrastructure.Tests` uses the EF InMemory provider by default for speed. Any test asserting on
   relational behavior — indexes, cascade paths, check constraints, transactions — runs against the
   Compose SQL Server instead, and says so in the test name.
-- `Api.Tests` uses `WebApplicationFactory<Program>`. `Program` is internal to `SaikoUniversity.Api`,
+- `Api.Tests` uses `WebApplicationFactory<Program>`. `Program` is internal to `Api`,
   which is why that project declares `InternalsVisibleTo`.
 - Replace the hosted service's database with a test double or a disposable database. Never point a
   test at the development database.

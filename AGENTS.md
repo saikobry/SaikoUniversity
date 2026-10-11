@@ -30,9 +30,9 @@ Direct children own their own code, configuration, and verification.
 | Display name | Saiko University | Login page, page titles, README |
 | GitHub repo | `saiko-university` | Monorepo root |
 | Solution | `SaikoUniversity.slnx` | .NET 10 XML solution format |
-| Assemblies / root namespaces | `SaikoUniversity.<Layer>` | `SaikoUniversity.Domain` |
+| Assemblies / root namespaces | Bare layer names | `Domain`, `Application`, `Infrastructure`, `Api` |
 | Type names | Role-based only | `AppDbContext`, `AddInfrastructure()` |
-| Test assemblies | `SaikoUniversity.<Layer>.Tests` | `SaikoUniversity.Api.Tests` |
+| Test assemblies | `<Layer>.Tests` | `Api.Tests` |
 | Frontend package | `saiko-university-web` | npm package name |
 | Docker image | `saiko-university-api` | lowercase, hyphenated |
 | Database | `SaikoUniversity` | Environment lives on the server |
@@ -40,9 +40,23 @@ Direct children own their own code, configuration, and verification.
 
 Rules:
 
-- Never embed the product name in type or method names. The root namespace carries it.
-- Future products follow `Saiko<Product>`. Brand-level shared resources use `saiko` only.
-- Do not introduce a bare `Saiko.*` namespace root. It collides with domain entity names.
+- Project folder, `.csproj` filename, assembly name, and root namespace always match.
+  `src/Domain/` holds `Domain.csproj`, which builds `Domain.dll` with namespace `Domain.*`.
+- Never name a type `Domain`, `Application`, `Infrastructure`, or `Api`. It clashes with the
+  namespace of the same name. Type names stay role-based.
+- Never embed the product name in type or method names.
+
+Why bare layer names: this is a single-product, single-domain-model solution, so a product
+prefix disambiguates nothing, and the bare name puts the architectural layer first.
+
+The tradeoff, stated so nobody rediscovers it: two projects sharing a bare name cannot coexist
+in one solution. Their assemblies overwrite each other in the output folder and the build fails
+with a misleading `CS0234`, because only one of the two assemblies survives the copy. If a second
+product or a second bounded context with its own `Domain` project enters this solution, prefix
+every layer in that same change. Do not mix styles.
+
+This is a deliberate convention for this repo, not a universal rule. Product-prefixed layers are
+the safer default for multi-product repositories.
 
 ### Secrets
 

@@ -1,4 +1,4 @@
-﻿# src — Application Code
+# src — Application Code
 
 ## Purpose
 
@@ -18,12 +18,12 @@ This directory owns no leaf code. Each child project owns its own files.
 ### Dependency direction
 
 ```
-SaikoUniversity.Api
-  -> SaikoUniversity.Infrastructure
-  -> SaikoUniversity.Application
-  -> SaikoUniversity.Domain
+Api
+  -> Infrastructure
+  -> Application
+  -> Domain
 
-SaikoUniversity.Domain  (no project references)
+Domain  (no project references)
 ```
 
 - References point inward only. A layer never references a layer above it.
@@ -65,7 +65,7 @@ SaikoUniversity.Domain  (no project references)
 
 ## Child DOX Index
 
-- `SaikoUniversity.Domain/` — entities, enums, value objects, no dependencies
-- `SaikoUniversity.Application/` — use-case orchestration, DTOs, port interfaces
-- `SaikoUniversity.Infrastructure/` — EF Core, SQL Server, migrations, seeding
-- `SaikoUniversity.Api/` — Kestrel host, controllers, middleware, DI composition
+- `Domain/` — entities, enums, value objects, no dependencies
+- `Application/` — use-case orchestration, DTOs, port interfaces
+- `Infrastructure/` — EF Core, SQL Server, migrations, seeding
+- `Api/` — Kestrel host, controllers, middleware, DI composition

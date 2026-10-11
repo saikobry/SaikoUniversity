@@ -41,10 +41,10 @@ the next milestone.
 Four layers with references pointing inward only. A layer never references a layer above it.
 
 ```
-SaikoUniversity.Api              HTTP edge: controllers, middleware, DI composition
-  └── SaikoUniversity.Infrastructure   EF Core, SQL Server, migrations, seeding
-        └── SaikoUniversity.Application  use-case services, DTOs, port interfaces
-              └── SaikoUniversity.Domain    entities, enums, invariants — zero dependencies
+Api              HTTP edge: controllers, middleware, DI composition
+  └── Infrastructure   EF Core, SQL Server, migrations, seeding
+        └── Application  use-case services, DTOs, port interfaces
+              └── Domain    entities, enums, invariants — zero dependencies
 ```
 
 `Domain` has no package references at all. Not EF Core, not ASP.NET Core. That constraint is what
@@ -60,12 +60,12 @@ the project graph rather than by convention.
 
 ```
 src/
-  SaikoUniversity.Domain/            entities, enums, value objects
-  SaikoUniversity.Application/       use-case services, DTOs, ports
-  SaikoUniversity.Infrastructure/   EF Core, migrations, seeding
-  SaikoUniversity.Api/               controllers, middleware, composition root
+  Domain/            entities, enums, value objects
+  Application/       use-case services, DTOs, ports
+  Infrastructure/   EF Core, migrations, seeding
+  Api/               controllers, middleware, composition root
 tests/
-  SaikoUniversity.<Layer>.Tests/     one per layer
+  <Layer>.Tests/            one per layer
 scripts/tools/                       repository tooling
 .agents/skills/                      agent skill definitions
 web/                                 frontend (planned)
@@ -95,7 +95,7 @@ SQL Server 2025 starts on port 1433 with a healthcheck. The compose file waits f
 ### Run the API
 
 ```powershell
-dotnet run --project src/SaikoUniversity.Api
+dotnet run --project src/Api
 ```
 
 | URL | What |
@@ -153,9 +153,9 @@ Secrets are never committed. `.env` is gitignored and holds the local container 
 
 ## Naming
 
-The product is Saiko University. Code uses a `Saiko<Product>` root namespace. Product names never
-appear in type or method names — `AppDbContext`, not `SaikoUniversityDbContext`. Future products
-follow `SaikoERP`, `SaikoLibrary`, `SaikoPOS`; brand-level shared resources use `saiko` alone.
+The product is Saiko University. Layers use bare names — `Domain`, `Application`,
+`Infrastructure`, `Api` — and type names stay role-based: `AppDbContext`, not
+`SaikoUniversityDbContext`. The tradeoff is stated in the root `AGENTS.md`.
 
 ## License
 
