@@ -104,10 +104,14 @@ the safer default for multi-product repositories.
 - Database health: `docker compose ps` reports `healthy` for `saiko-uni-sql`
 - Whitespace: `powershell -ExecutionPolicy Bypass -File scripts/tools/clean-whitespace.ps1`
 - OpenAPI snapshot: `powershell -ExecutionPolicy Bypass -File scripts/tools/update-openapi.ps1`
+- Frontend types: `npm --prefix web run build` — must succeed with no TypeScript errors
+- Frontend dev server: `npm --prefix web run dev` — serves on port 5173, no console errors
+- Typed client regeneration: `npm --prefix web run api:generate` — no diff when the contract is unchanged
 
 ## Child DOX Index
 
 - `.agents/` — agent skills and agent-instruction assets checked into the repo
 - `src/` — all production .NET projects and the layering contract between them
 - `tests/` — one test project per src layer, plus shared test infrastructure
+- `web/` — the React SPA, its generated API client, and its layering conventions
 - `scripts/` — repository tooling, with its own naming and authoring rules
