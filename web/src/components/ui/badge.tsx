@@ -26,3 +26,5 @@ export function Badge({
 }: HTMLAttributes<HTMLSpanElement> & VariantProps<typeof badgeVariants>) {
   return <span className={cn(badgeVariants({ variant }), className)} {...props} />;
 }
+
+export { badgeVariants };
