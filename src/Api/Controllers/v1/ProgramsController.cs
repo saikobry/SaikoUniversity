@@ -37,7 +37,7 @@ public sealed class ProgramsController(ProgramService programs) : ControllerBase
     /// </summary>
     [HttpGet("{id:guid}")]
     [ProducesResponseType<ProgramResponse>(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ProgramResponse>> GetById(
         Guid id,
         CancellationToken cancellationToken = default)
@@ -46,7 +46,11 @@ public sealed class ProgramsController(ProgramService programs) : ControllerBase
 
         if (program is null)
         {
-            return NotFound();
+            // The generated API client types this response as ErrorResponse, so it must carry a
+            // body. A bare NotFound() advertises a contract the server then does not honour.
+            return NotFound(new ErrorResponse(
+                ErrorCode.ProgramNotFound.ToString(),
+                $"Program '{id}' was not found."));
         }
 
         return Ok(ProgramResponse.From(program));
