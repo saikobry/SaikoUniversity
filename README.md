@@ -22,10 +22,12 @@ the next milestone.
 | Dockerfile, multi-stage, unprivileged, compose for API + SQL | Done |
 | Repository tooling (whitespace, OpenAPI snapshot) | Done |
 | DOX agent contract hierarchy | Done |
-| Domain entities, EF configurations, migrations | Next |
-| Seed data | Next |
+| Domain entities, EF configurations, migrations | Done |
+| Seed data | Done |
+| Curriculum vertical slice: programs API, lifecycle, audit interceptor | Done |
 | Authentication and role-based access | Planned |
 | Reporting, audit log | Planned |
+| Frontend `web/` scaffold and typed API client | Next |
 | CI/CD and Azure deployment | Planned |
 
 ## Stack
