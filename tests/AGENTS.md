@@ -37,13 +37,32 @@ exactly as much of the system as it needs to exercise.
 
 ### Data setup
 
-- `Infrastructure.Tests` uses the EF InMemory provider by default for speed. Any test asserting on
-  relational behavior — indexes, cascade paths, check constraints, transactions — runs against the
-  Compose SQL Server instead, and says so in the test name.
+- `Infrastructure.Tests` uses the EF InMemory provider by default for speed. Anything the provider
+  cannot express goes to the Compose SQL Server — see Relational tests below.
 - `Api.Tests` uses `WebApplicationFactory<Program>`. `Program` is internal to `Api`,
-  which is why that project declares `InternalsVisibleTo`.
+  which is why that project declares `InternalsVisibleTo`. The factory swaps the database provider and
+  shares the production registration seam, so the two graphs differ only in where they store rows.
 - Replace the hosted service's database with a test double or a disposable database. Never point a
   test at the development database.
+
+### Relational tests
+
+Some assertions only mean anything against the real engine. InMemory has no unique indexes, no
+foreign keys, and no transactions, and it does not translate `EF.Functions.Like` at all. A test that
+needs any of those is testing persistence, not a use case.
+
+- Put relational tests in `Infrastructure.Tests`, and say so in the test name — suffix it
+  `_OnSqlServer`. `Application` cannot reference `Infrastructure`, so `Application.Tests` is not an
+  option even when the code under test lives in `Application`.
+- Get a database through `Support/SqlServerDatabase.TryCreateAsync`. It creates a uniquely named
+  database, applies migrations, and drops it on dispose. Migrations, not `EnsureCreated`, because the
+  schema under test is the migrated one.
+- It returns `null` when the Compose container is unreachable. Guard on that and call `Assert.Skip`,
+  so `dotnet test SaikoUniversity.slnx` still passes on a machine without Docker. A skip is a
+  reporting decision, so make it conditional and visible — a guard that skips unconditionally is
+  worse than no test at all, because it looks like coverage.
+- Never point a relational test at the development database. That makes a run depend on Docker
+  running, on migrations being applied, and on rows an earlier run left behind.
 
 ### Test doubles
 
