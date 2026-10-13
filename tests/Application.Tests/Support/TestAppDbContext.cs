@@ -65,16 +65,34 @@ internal sealed class TestAppDbContext(DbContextOptions<TestAppDbContext> option
     }
 
     /// <summary>
+    /// Adds an academic level and returns the created entity.
+    /// </summary>
+    public AcademicLevel SeedAcademicLevel(string code = "UG", string name = "Undergraduate")
+    {
+        var level = new AcademicLevel(code, name);
+        Set<AcademicLevel>().Add(level);
+        SaveChanges();
+        return level;
+    }
+
+    /// <summary>
+    /// Adds a department and returns the created entity.
+    /// </summary>
+    public Department SeedDepartment(string code = "COMP", string name = "Faculty of Computing")
+    {
+        var department = new Department(code, name);
+        Set<Department>().Add(department);
+        SaveChanges();
+        return department;
+    }
+
+    /// <summary>
     /// Adds the reference data a program must point at, and returns the ids.
     /// </summary>
     public (Guid LevelId, Guid DepartmentId) SeedReferenceData()
     {
-        var level = new AcademicLevel("UG", "Undergraduate");
-        var department = new Department("COMP", "Faculty of Computing");
-
-        Set<AcademicLevel>().Add(level);
-        Set<Department>().Add(department);
-        SaveChanges();
+        var level = SeedAcademicLevel();
+        var department = SeedDepartment();
 
         return (level.Id, department.Id);
     }
