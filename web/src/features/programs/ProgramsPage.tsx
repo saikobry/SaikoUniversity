@@ -8,6 +8,7 @@ import { CreateProgramModal } from '@/features/programs/CreateProgramModal';
 import { EditProgramModal } from '@/features/programs/EditProgramModal';
 import { ProgramsTable } from '@/features/programs/ProgramsTable';
 import { useCreateProgram, usePrograms, useUpdateProgram } from '@/features/programs/usePrograms';
+import { useAcademicLevels, useDepartments } from '@/features/reference-data/useReferenceData';
 import { renderGuard } from '@/lib/renderGuard';
 
 /**
@@ -26,6 +27,16 @@ export function ProgramsPage() {
   const [editError, setEditError] = useState<string | null>(null);
 
   const { data, isPending, isError, error, refetch, isFetching } = usePrograms();
+  const {
+    data: levelsData,
+    isPending: levelsPending,
+    isError: levelsError,
+  } = useAcademicLevels();
+  const {
+    data: departmentsData,
+    isPending: departmentsPending,
+    isError: departmentsError,
+  } = useDepartments();
 
   const createMutation = useCreateProgram();
   const updateMutation = useUpdateProgram();
@@ -33,26 +44,23 @@ export function ProgramsPage() {
   const rows = useMemo(() => data?.data.items ?? [], [data]);
   const total = Number(data?.data.totalCount ?? 0);
 
-  // Derive available level and department options from the loaded dataset
-  const levels = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const r of rows) {
-      if (r.academicLevelId && r.academicLevelCode) {
-        map.set(r.academicLevelId, r.academicLevelCode);
-      }
-    }
-    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
-  }, [rows]);
+  const levels = useMemo(
+    () =>
+      (levelsData?.data ?? []).map((x) => ({
+        id: x.id,
+        name: x.code,
+      })),
+    [levelsData],
+  );
 
-  const departments = useMemo(() => {
-    const map = new Map<string, string>();
-    for (const r of rows) {
-      if (r.departmentId && r.departmentName) {
-        map.set(r.departmentId, r.departmentName);
-      }
-    }
-    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
-  }, [rows]);
+  const departments = useMemo(
+    () =>
+      (departmentsData?.data ?? []).map((x) => ({
+        id: x.id,
+        name: x.name,
+      })),
+    [departmentsData],
+  );
 
   const handleCreate = async (request: CreateProgramRequest) => {
     setCreateError(null);
@@ -141,12 +149,21 @@ export function ProgramsPage() {
 
         <div className="flex items-center gap-2">
           {isFetching && <span className="text-muted-foreground text-xs mr-2">Refreshing…</span>}
-          <Button onClick={() => { setCreateError(null); setIsCreateOpen(true); }}>
+          <Button
+            onClick={() => { setCreateError(null); setIsCreateOpen(true); }}
+            disabled={levelsPending || departmentsPending}
+          >
             <Plus className="h-4 w-4 mr-1" />
             New Program
           </Button>
         </div>
       </div>
+
+      {(levelsError || departmentsError) && (
+        <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-destructive text-sm" role="alert">
+          Could not load reference data (academic levels or departments). Creating new programs is unavailable.
+        </div>
+      )}
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative w-full sm:max-w-xs">
