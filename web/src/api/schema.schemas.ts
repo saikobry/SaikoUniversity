@@ -21,22 +21,6 @@ export interface ErrorResponse {
   message: string;
 }
 
-export interface ProblemDetails {
-  /** @nullable */
-  type?: string | null;
-  /** @nullable */
-  title?: string | null;
-  /**
-     * @nullable
-     * @pattern ^-?(?:0|[1-9]\d*)$
-     */
-  status?: number | string | null;
-  /** @nullable */
-  detail?: string | null;
-  /** @nullable */
-  instance?: string | null;
-}
-
 export interface ProgramResponse {
   id: string;
   code: string;
@@ -64,6 +48,12 @@ export interface ProgramListResponse {
   pageSize: number | string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   pageCount: number | string;
+}
+
+export interface ReferenceItemResponse {
+  id: string;
+  code: string;
+  name: string;
 }
 
 export interface UpdateProgramRequest {

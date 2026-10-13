@@ -27,7 +27,6 @@ import type {
   CreateProgramRequest,
   ErrorResponse,
   GetApiV1ProgramsParams,
-  ProblemDetails,
   ProgramListResponse,
   ProgramResponse,
   UpdateProgramRequest
@@ -279,7 +278,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 }
 
 export type getApiV1ProgramsIdResponse404 = {
-  data: ProblemDetails
+  data: ErrorResponse
   status: 404
 }
 
@@ -322,7 +321,7 @@ export const getGetApiV1ProgramsIdQueryKey = (id: string,) => {
     }
 
 
-export const getGetApiV1ProgramsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError = ProblemDetails>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
+export const getGetApiV1ProgramsIdQueryOptions = <TData = Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError = ErrorResponse>(id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -341,10 +340,10 @@ const {query: queryOptions, request: requestOptions} = options ?? {};
 }
 
 export type GetApiV1ProgramsIdQueryResult = NonNullable<Awaited<ReturnType<typeof getApiV1ProgramsId>>>
-export type GetApiV1ProgramsIdQueryError = ProblemDetails
+export type GetApiV1ProgramsIdQueryError = ErrorResponse
 
 
-export function useGetApiV1ProgramsId<TData = Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError = ProblemDetails>(
+export function useGetApiV1ProgramsId<TData = Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError = ErrorResponse>(
  id: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiV1ProgramsId>>,
@@ -354,7 +353,7 @@ export function useGetApiV1ProgramsId<TData = Awaited<ReturnType<typeof getApiV1
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1ProgramsId<TData = Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError = ProblemDetails>(
+export function useGetApiV1ProgramsId<TData = Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
           Awaited<ReturnType<typeof getApiV1ProgramsId>>,
@@ -364,12 +363,12 @@ export function useGetApiV1ProgramsId<TData = Awaited<ReturnType<typeof getApiV1
       >, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetApiV1ProgramsId<TData = Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError = ProblemDetails>(
+export function useGetApiV1ProgramsId<TData = Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 
-export function useGetApiV1ProgramsId<TData = Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError = ProblemDetails>(
+export function useGetApiV1ProgramsId<TData = Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError = ErrorResponse>(
  id: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getApiV1ProgramsId>>, TError, TData>>, request?: SecondParameter<typeof customInstance>}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
