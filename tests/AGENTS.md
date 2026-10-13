@@ -62,7 +62,13 @@ exactly as much of the system as it needs to exercise.
 ## Verification
 
 - `dotnet test SaikoUniversity.slnx`
-- `dotnet test SaikoUniversity.slnx --collect:"XPlat Code Coverage"`
+- `dotnet test SaikoUniversity.slnx --coverage` — writes `.coverage` files to `TestResults/`
+- Never pass `--nologo` or any other VSTest-era switch to `dotnet test`. This repo runs in
+  Microsoft Testing Platform mode, which forwards those switches to the test app instead of
+  consuming them. The app rejects them with exit code 5 and the run reports `Zero tests ran` even
+  though every test is present and passing.
+- A test project with no test files reports `Zero tests ran` and exit code 8. That is a real signal,
+  not a runner fault.
 - Tests must pass with zero warnings, since warnings are errors project-wide.
 
 ## Child DOX Index
