@@ -12,8 +12,9 @@ using Domain.Entities;
 namespace Api.Tests.Support;
 
 /// <summary>
-/// Boots the real host — real controllers, real DI graph, real <c>ProgramService</c> — against an
-/// InMemory database instead of the Compose SQL Server.
+/// Shared host fixture for <c>Api.Tests</c>. Boots the real host — real controllers, real DI graph —
+/// against an InMemory database instead of the Compose SQL Server, so every slice can share one
+/// arrangement.
 /// </summary>
 /// <remarks>
 /// <c>AddInfrastructure</c> reads <c>ConnectionStrings:Default</c>, which in Development points at
@@ -30,7 +31,7 @@ namespace Api.Tests.Support;
 /// and belongs in <c>Infrastructure.Tests</c> against the real database.
 /// </para>
 /// </remarks>
-public sealed class ProgramsApiFactory : WebApplicationFactory<Program>
+public sealed class ApiFactory : WebApplicationFactory<Program>
 {
     private readonly string _databaseName = $"saiko-api-test-{Guid.CreateVersion7()}";
 

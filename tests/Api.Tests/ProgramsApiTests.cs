@@ -18,7 +18,7 @@ namespace Api.Tests;
 /// <c>Infrastructure.Tests</c> against SQL Server, and they do not cover the service's own rules —
 /// those live in <c>ProgramServiceTests</c>.
 /// </remarks>
-public sealed class ProgramsApiTests(ProgramsApiFactory factory) : IClassFixture<ProgramsApiFactory>, IDisposable
+public sealed class ProgramsApiTests(ApiFactory factory) : IClassFixture<ApiFactory>, IDisposable
 {
     private readonly HttpClient _client = factory.CreateClient();
 
