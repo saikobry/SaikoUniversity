@@ -68,6 +68,25 @@ which is what Orval splits on.
   mutation invalidations in one file.
 - A presentational component never fetches. If a table needs data, the page passes it in.
 
+### Stable references for TanStack Table
+
+`columns` and `data` must be referentially stable across renders. Memoize both. This is the
+documented cause of a tab-killing infinite loop.
+
+- Never spread the rows array into `data`. Rows from the query cache are already stable; spreading
+  them destroys that identity.
+- Memoize any transformation. `data?.filter(...) ?? []` inline is the same bug wearing a disguise.
+- Symptom: page loads fine, then locks the tab on an unrelated interaction such as opening a form
+  or toggling a filter. F5 does not recover it. Look at reference stability in the table, not the
+  interaction.
+- Source: https://tanstack.com/table/v8/docs/faq
+
+### Modals and table re-renders
+
+A dialog opens on top of the same tree as the table. If that parent re-render makes `columns` or
+`data` change identity, TanStack re-enters its row model and can loop until the renderer dies.
+Keep `columns` and `data` memoized with stable deps, even while a modal is open over the table.
+
 ### Conventions
 
 - `cn()` from `@/lib/utils` in every `className`. Never concatenate class strings.

@@ -55,6 +55,11 @@ export function CreateProgramModal({
       return;
     }
 
+    const credits = Number(requiredCredits);
+    if (!Number.isInteger(credits) || credits <= 0) {
+      return;
+    }
+
     await onSubmit({
       code: code.trim(),
       name: name.trim(),

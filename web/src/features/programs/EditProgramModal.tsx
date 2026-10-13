@@ -49,6 +49,9 @@ export function EditProgramModal({
     e.preventDefault();
     if (!name.trim()) return;
 
+    const credits = Number(requiredCredits);
+    if (!Number.isInteger(credits) || credits <= 0) return;
+
     await onSubmit(program.id, {
       name: name.trim(),
       requiredCredits: Number(requiredCredits),

@@ -6,7 +6,7 @@ import {
   usePostApiV1Programs,
   usePutApiV1ProgramsId,
 } from '@/api';
-import type { GetApiV1ProgramsParams } from '@/api/schema.schemas';
+import type { GetApiV1ProgramsParams, ProgramResponse } from '@/api/schema.schemas';
 
 /**
  * Every data-fetching and mutation hook for the programs slice lives here, not in a component.
@@ -21,6 +21,20 @@ export function usePrograms(params?: GetApiV1ProgramsParams) {
     pageSize: 50,
     ...params,
   });
+}
+
+/**
+ * Finds one program in the already-loaded list, keyed by route/record id.
+ *
+ * Avoids a second request for data the table already has. If the catalogue grows beyond one
+ * page, replace this with a real by-id query.
+ */
+export function useProgram(id: string) {
+  const { data, isPending, isError } = usePrograms();
+  const program = data?.data?.items?.find((row) => row.id === id) as
+    | ProgramResponse
+    | undefined;
+  return { program, isPending, isError };
 }
 
 export function useCreateProgram() {
