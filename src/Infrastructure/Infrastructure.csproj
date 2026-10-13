@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="Infrastructure.Tests" />
+    <InternalsVisibleTo Include="Api.Tests" />
   </ItemGroup>
 
 </Project>
