@@ -90,7 +90,7 @@ public sealed class ProgramsController(ProgramService programs) : ControllerBase
     }
 
     /// <summary>
-    /// Updates a program's name, required credits, recognition, and lifecycle.
+    /// Updates a program's name and required credits.
     /// </summary>
     [HttpPut("{id:guid}")]
     [ProducesResponseType<ProgramResponse>(StatusCodes.Status200OK)]
@@ -103,11 +103,89 @@ public sealed class ProgramsController(ProgramService programs) : ControllerBase
     {
         var command = new Application.Programs.Dtos.UpdateProgramRequest(
             request.Name,
-            request.RequiredCredits,
-            request.IsRegulatorRecognised,
-            request.IsRetired);
+            request.RequiredCredits);
 
         var result = await programs.UpdateAsync(id, command, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return ToActionResult(result.Error!);
+        }
+
+        return Ok(ProgramResponse.From(result.Value!));
+    }
+
+    /// <summary>
+    /// Retires an academic program.
+    /// </summary>
+    [HttpPost("{id:guid}/retire")]
+    [ProducesResponseType<ProgramResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProgramResponse>> Retire(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await programs.RetireAsync(id, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return ToActionResult(result.Error!);
+        }
+
+        return Ok(ProgramResponse.From(result.Value!));
+    }
+
+    /// <summary>
+    /// Reinstates a retired academic program.
+    /// </summary>
+    [HttpPost("{id:guid}/reinstate")]
+    [ProducesResponseType<ProgramResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProgramResponse>> Reinstate(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await programs.ReinstateAsync(id, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return ToActionResult(result.Error!);
+        }
+
+        return Ok(ProgramResponse.From(result.Value!));
+    }
+
+    /// <summary>
+    /// Marks an academic program as recognized by its regulator.
+    /// </summary>
+    [HttpPost("{id:guid}/recognise")]
+    [ProducesResponseType<ProgramResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProgramResponse>> Recognise(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await programs.RecogniseAsync(id, cancellationToken);
+
+        if (!result.Succeeded)
+        {
+            return ToActionResult(result.Error!);
+        }
+
+        return Ok(ProgramResponse.From(result.Value!));
+    }
+
+    /// <summary>
+    /// Withdraws regulator recognition from an academic program.
+    /// </summary>
+    [HttpPost("{id:guid}/withdraw-recognition")]
+    [ProducesResponseType<ProgramResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ProgramResponse>> WithdrawRecognition(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await programs.WithdrawRecognitionAsync(id, cancellationToken);
 
         if (!result.Succeeded)
         {

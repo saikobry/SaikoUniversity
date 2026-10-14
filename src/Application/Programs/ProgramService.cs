@@ -115,25 +115,107 @@ public sealed class ProgramService(IAppDbContext context)
         program.Rename(request.Name.Trim());
         program.SetRequiredCredits(request.RequiredCredits);
 
-        if (request.IsRegulatorRecognised)
-        {
-            program.Recognise();
-        }
-        else
-        {
-            program.WithdrawRecognition();
-        }
-
-        if (request.IsRetired)
-        {
-            program.Retire();
-        }
-        else
-        {
-            program.Reinstate();
-        }
-
         await context.SaveChangesAsync(cancellationToken);
+
+        return Result<ProgramDto>.Success(ToDto(program));
+    }
+
+    /// <summary>
+    /// Retires an academic program.
+    /// </summary>
+    public async Task<Result<ProgramDto>> RetireAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var program = await context.AcademicPrograms
+            .Include(x => x.AcademicLevel!)
+            .Include(x => x.Department!)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (program is null)
+        {
+            return Result<ProgramDto>.Failure(
+                ErrorCode.ProgramNotFound,
+                $"Program '{id}' does not exist.");
+        }
+
+        if (program.Retire())
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+
+        return Result<ProgramDto>.Success(ToDto(program));
+    }
+
+    /// <summary>
+    /// Reinstates a retired academic program.
+    /// </summary>
+    public async Task<Result<ProgramDto>> ReinstateAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var program = await context.AcademicPrograms
+            .Include(x => x.AcademicLevel!)
+            .Include(x => x.Department!)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (program is null)
+        {
+            return Result<ProgramDto>.Failure(
+                ErrorCode.ProgramNotFound,
+                $"Program '{id}' does not exist.");
+        }
+
+        if (program.Reinstate())
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+
+        return Result<ProgramDto>.Success(ToDto(program));
+    }
+
+    /// <summary>
+    /// Marks an academic program as recognized by its regulator.
+    /// </summary>
+    public async Task<Result<ProgramDto>> RecogniseAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var program = await context.AcademicPrograms
+            .Include(x => x.AcademicLevel!)
+            .Include(x => x.Department!)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (program is null)
+        {
+            return Result<ProgramDto>.Failure(
+                ErrorCode.ProgramNotFound,
+                $"Program '{id}' does not exist.");
+        }
+
+        if (program.Recognise())
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
+
+        return Result<ProgramDto>.Success(ToDto(program));
+    }
+
+    /// <summary>
+    /// Withdraws regulator recognition from an academic program.
+    /// </summary>
+    public async Task<Result<ProgramDto>> WithdrawRecognitionAsync(Guid id, CancellationToken cancellationToken = default)
+    {
+        var program = await context.AcademicPrograms
+            .Include(x => x.AcademicLevel!)
+            .Include(x => x.Department!)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+
+        if (program is null)
+        {
+            return Result<ProgramDto>.Failure(
+                ErrorCode.ProgramNotFound,
+                $"Program '{id}' does not exist.");
+        }
+
+        if (program.WithdrawRecognition())
+        {
+            await context.SaveChangesAsync(cancellationToken);
+        }
 
         return Result<ProgramDto>.Success(ToDto(program));
     }

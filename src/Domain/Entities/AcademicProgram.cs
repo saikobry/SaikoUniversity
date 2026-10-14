@@ -71,11 +71,47 @@ public sealed class AcademicProgram : Entity
 
     public void SetRequiredCredits(int requiredCredits) => RequiredCredits = requiredCredits;
 
-    public void Recognise() => IsRegulatorRecognised = true;
+    public bool Recognise()
+    {
+        if (IsRegulatorRecognised)
+        {
+            return false;
+        }
 
-    public void WithdrawRecognition() => IsRegulatorRecognised = false;
+        IsRegulatorRecognised = true;
+        return true;
+    }
 
-    public void Retire() => Lifecycle = ProgramLifecycle.Retired;
+    public bool WithdrawRecognition()
+    {
+        if (!IsRegulatorRecognised)
+        {
+            return false;
+        }
 
-    public void Reinstate() => Lifecycle = ProgramLifecycle.Active;
+        IsRegulatorRecognised = false;
+        return true;
+    }
+
+    public bool Retire()
+    {
+        if (Lifecycle == ProgramLifecycle.Retired)
+        {
+            return false;
+        }
+
+        Lifecycle = ProgramLifecycle.Retired;
+        return true;
+    }
+
+    public bool Reinstate()
+    {
+        if (Lifecycle == ProgramLifecycle.Active)
+        {
+            return false;
+        }
+
+        Lifecycle = ProgramLifecycle.Active;
+        return true;
+    }
 }

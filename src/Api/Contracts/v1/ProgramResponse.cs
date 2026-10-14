@@ -69,8 +69,6 @@ public sealed record CreateProgramRequest(
 /// </summary>
 public sealed record UpdateProgramRequest(
     string Name,
-    int RequiredCredits,
-    bool IsRegulatorRecognised,
-    bool IsRetired);
+    int RequiredCredits);
 
 public sealed record ErrorResponse(string Code, string Message);

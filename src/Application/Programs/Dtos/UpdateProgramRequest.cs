@@ -9,6 +9,4 @@ namespace Application.Programs.Dtos;
 /// </remarks>
 public sealed record UpdateProgramRequest(
     string Name,
-    int RequiredCredits,
-    bool IsRegulatorRecognised,
-    bool IsRetired);
+    int RequiredCredits);

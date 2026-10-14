@@ -114,13 +114,172 @@ public sealed class ProgramsApiTests(ApiFactory factory) : IClassFixture<ApiFact
 
         var response = await _client.PutAsJsonAsync(
             $"/api/v1/programs/{id}",
-            new UpdateProgramRequest("Renamed", 144, true, false),
+            new UpdateProgramRequest("Renamed", 144),
             TestContext.Current.CancellationToken);
 
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
         var body = await response.Content.ReadFromJsonAsync<ErrorResponse>(TestContext.Current.CancellationToken);
         body!.Code.Should().Be(nameof(Application.Common.ErrorCode.ProgramNotFound));
+    }
+
+    [Fact]
+    public async Task Update_ValidRequest_DoesNotMutateLifecycleOrRecognition()
+    {
+        var createResponse = await _client.PostAsJsonAsync(
+            "/api/v1/programs",
+            ValidPayload(),
+            TestContext.Current.CancellationToken);
+        var created = await createResponse.Content.ReadFromJsonAsync<ProgramResponse>(TestContext.Current.CancellationToken);
+
+        var response = await _client.PutAsJsonAsync(
+            $"/api/v1/programs/{created!.Id}",
+            new UpdateProgramRequest("Updated Name", 160),
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var updated = await response.Content.ReadFromJsonAsync<ProgramResponse>(TestContext.Current.CancellationToken);
+        updated!.Name.Should().Be("Updated Name");
+        updated.RequiredCredits.Should().Be(160);
+        updated.Lifecycle.Should().Be("Active");
+        updated.IsRegulatorRecognised.Should().BeTrue();
+        updated.CanAcceptStudents.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Retire_UnknownId_Returns404WithErrorBody()
+    {
+        var id = Guid.CreateVersion7();
+
+        var response = await _client.PostAsync(
+            $"/api/v1/programs/{id}/retire",
+            content: null,
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var body = await response.Content.ReadFromJsonAsync<ErrorResponse>(TestContext.Current.CancellationToken);
+        body!.Code.Should().Be(nameof(Application.Common.ErrorCode.ProgramNotFound));
+    }
+
+    [Fact]
+    public async Task Retire_ValidId_Returns200WithRetiredLifecycle()
+    {
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/programs", ValidPayload(), TestContext.Current.CancellationToken);
+        var created = await createResponse.Content.ReadFromJsonAsync<ProgramResponse>(TestContext.Current.CancellationToken);
+
+        var response = await _client.PostAsync(
+            $"/api/v1/programs/{created!.Id}/retire",
+            content: null,
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<ProgramResponse>(TestContext.Current.CancellationToken);
+        body!.Lifecycle.Should().Be("Retired");
+        body.CanAcceptStudents.Should().BeFalse();
+    }
+
+    [Fact]
+    public async Task Reinstate_UnknownId_Returns404WithErrorBody()
+    {
+        var id = Guid.CreateVersion7();
+
+        var response = await _client.PostAsync(
+            $"/api/v1/programs/{id}/reinstate",
+            content: null,
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var body = await response.Content.ReadFromJsonAsync<ErrorResponse>(TestContext.Current.CancellationToken);
+        body!.Code.Should().Be(nameof(Application.Common.ErrorCode.ProgramNotFound));
+    }
+
+    [Fact]
+    public async Task Reinstate_ValidId_Returns200WithActiveLifecycle()
+    {
+        var createResponse = await _client.PostAsJsonAsync("/api/v1/programs", ValidPayload(), TestContext.Current.CancellationToken);
+        var created = await createResponse.Content.ReadFromJsonAsync<ProgramResponse>(TestContext.Current.CancellationToken);
+
+        await _client.PostAsync($"/api/v1/programs/{created!.Id}/retire", content: null, TestContext.Current.CancellationToken);
+
+        var response = await _client.PostAsync(
+            $"/api/v1/programs/{created.Id}/reinstate",
+            content: null,
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<ProgramResponse>(TestContext.Current.CancellationToken);
+        body!.Lifecycle.Should().Be("Active");
+        body.CanAcceptStudents.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Recognise_UnknownId_Returns404WithErrorBody()
+    {
+        var id = Guid.CreateVersion7();
+
+        var response = await _client.PostAsync(
+            $"/api/v1/programs/{id}/recognise",
+            content: null,
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var body = await response.Content.ReadFromJsonAsync<ErrorResponse>(TestContext.Current.CancellationToken);
+        body!.Code.Should().Be(nameof(Application.Common.ErrorCode.ProgramNotFound));
+    }
+
+    [Fact]
+    public async Task Recognise_ValidId_Returns200WithRecognisedTrue()
+    {
+        var createResponse = await _client.PostAsJsonAsync(
+            "/api/v1/programs",
+            ValidPayload() with { IsRegulatorRecognised = false },
+            TestContext.Current.CancellationToken);
+        var created = await createResponse.Content.ReadFromJsonAsync<ProgramResponse>(TestContext.Current.CancellationToken);
+
+        var response = await _client.PostAsync(
+            $"/api/v1/programs/{created!.Id}/recognise",
+            content: null,
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<ProgramResponse>(TestContext.Current.CancellationToken);
+        body!.IsRegulatorRecognised.Should().BeTrue();
+        body.CanAcceptStudents.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task WithdrawRecognition_UnknownId_Returns404WithErrorBody()
+    {
+        var id = Guid.CreateVersion7();
+
+        var response = await _client.PostAsync(
+            $"/api/v1/programs/{id}/withdraw-recognition",
+            content: null,
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+        var body = await response.Content.ReadFromJsonAsync<ErrorResponse>(TestContext.Current.CancellationToken);
+        body!.Code.Should().Be(nameof(Application.Common.ErrorCode.ProgramNotFound));
+    }
+
+    [Fact]
+    public async Task WithdrawRecognition_ValidId_Returns200WithRecognisedFalse()
+    {
+        var createResponse = await _client.PostAsJsonAsync(
+            "/api/v1/programs",
+            ValidPayload() with { IsRegulatorRecognised = true },
+            TestContext.Current.CancellationToken);
+        var created = await createResponse.Content.ReadFromJsonAsync<ProgramResponse>(TestContext.Current.CancellationToken);
+
+        var response = await _client.PostAsync(
+            $"/api/v1/programs/{created!.Id}/withdraw-recognition",
+            content: null,
+            TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var body = await response.Content.ReadFromJsonAsync<ProgramResponse>(TestContext.Current.CancellationToken);
+        body!.IsRegulatorRecognised.Should().BeFalse();
+        body.CanAcceptStudents.Should().BeFalse();
     }
 
     [Fact]

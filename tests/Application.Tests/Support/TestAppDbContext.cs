@@ -30,6 +30,14 @@ internal sealed class TestAppDbContext(DbContextOptions<TestAppDbContext> option
 
     public void AddProgram(AcademicProgram program) => Set<AcademicProgram>().Add(program);
 
+    public int SaveChangesCalls { get; private set; }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        SaveChangesCalls++;
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AcademicProgram>(program =>

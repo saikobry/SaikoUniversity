@@ -146,7 +146,7 @@ public sealed class ProgramServiceTests : IDisposable
     {
         var program = _context.SeedProgram();
 
-        var result = await _service.UpdateAsync(program.Id, new UpdateProgramRequest("  ", 120, true, false), Token);
+        var result = await _service.UpdateAsync(program.Id, new UpdateProgramRequest("  ", 120), Token);
 
         result.Succeeded.Should().BeFalse();
         result.Error!.Message.Should().Contain("Name");
@@ -157,7 +157,7 @@ public sealed class ProgramServiceTests : IDisposable
     {
         var program = _context.SeedProgram();
 
-        var result = await _service.UpdateAsync(program.Id, new UpdateProgramRequest("Renamed", 0, true, false), Token);
+        var result = await _service.UpdateAsync(program.Id, new UpdateProgramRequest("Renamed", 0), Token);
 
         result.Succeeded.Should().BeFalse();
         result.Error!.Message.Should().Contain("RequiredCredits");
@@ -166,7 +166,7 @@ public sealed class ProgramServiceTests : IDisposable
     [Fact]
     public async Task Update_UnknownId_ReturnsProgramNotFound()
     {
-        var request = new UpdateProgramRequest("Renamed", 120, true, false);
+        var request = new UpdateProgramRequest("Renamed", 120);
 
         var result = await _service.UpdateAsync(Guid.CreateVersion7(), request, Token);
 
@@ -181,7 +181,7 @@ public sealed class ProgramServiceTests : IDisposable
 
         var result = await _service.UpdateAsync(
             program.Id,
-            new UpdateProgramRequest("BS Information Technology", 144, true, false), Token);
+            new UpdateProgramRequest("BS Information Technology", 144), Token);
 
         result.Value!.Name.Should().Be("BS Information Technology");
     }
@@ -193,30 +193,141 @@ public sealed class ProgramServiceTests : IDisposable
 
         var result = await _service.UpdateAsync(
             program.Id,
-            new UpdateProgramRequest(program.Name, 180, true, false), Token);
+            new UpdateProgramRequest(program.Name, 180), Token);
 
         result.Value!.RequiredCredits.Should().Be(180);
     }
 
     [Fact]
-    public async Task Update_RetireRequested_ReturnsRetiredLifecycle()
-    {
-        var program = _context.SeedProgram();
-
-        var result = await _service.UpdateAsync(program.Id, new UpdateProgramRequest(program.Name, 120, true, true), Token);
-
-        result.Value!.Lifecycle.Should().Be(nameof(ProgramLifecycle.Retired));
-        result.Value.CanAcceptStudents.Should().BeFalse();
-    }
-
-    [Fact]
-    public async Task Update_RecognitionWithdrawn_ReturnsCanAcceptStudentsFalse()
+    public async Task Update_ValidRequest_DoesNotMutateLifecycleOrRecognition()
     {
         var program = _context.SeedProgram(isRegulatorRecognised: true);
 
-        var result = await _service.UpdateAsync(program.Id, new UpdateProgramRequest(program.Name, 120, false, false), Token);
+        var result = await _service.UpdateAsync(
+            program.Id,
+            new UpdateProgramRequest("Renamed", 150),
+            Token);
 
-        result.Value!.CanAcceptStudents.Should().BeFalse();
+        result.Value!.Lifecycle.Should().Be(nameof(ProgramLifecycle.Active));
+        result.Value.IsRegulatorRecognised.Should().BeTrue();
+        result.Value.CanAcceptStudents.Should().BeTrue();
+    }
+
+    [Fact]
+    public async Task Retire_UnknownId_ReturnsProgramNotFound()
+    {
+        var result = await _service.RetireAsync(Guid.CreateVersion7(), Token);
+
+        result.Succeeded.Should().BeFalse();
+        result.Error!.Code.Should().Be(ErrorCode.ProgramNotFound);
+    }
+
+    [Fact]
+    public async Task Retire_ActiveProgram_RetiresAndSavesChanges_SecondCallIsIdempotentAndSkipsSave()
+    {
+        var program = _context.SeedProgram();
+        var initialSaves = _context.SaveChangesCalls;
+
+        var firstResult = await _service.RetireAsync(program.Id, Token);
+
+        firstResult.Succeeded.Should().BeTrue();
+        firstResult.Value!.Lifecycle.Should().Be(nameof(ProgramLifecycle.Retired));
+        firstResult.Value.CanAcceptStudents.Should().BeFalse();
+        _context.SaveChangesCalls.Should().Be(initialSaves + 1);
+
+        var secondResult = await _service.RetireAsync(program.Id, Token);
+
+        secondResult.Succeeded.Should().BeTrue();
+        secondResult.Value!.Lifecycle.Should().Be(nameof(ProgramLifecycle.Retired));
+        _context.SaveChangesCalls.Should().Be(initialSaves + 1);
+    }
+
+    [Fact]
+    public async Task Reinstate_UnknownId_ReturnsProgramNotFound()
+    {
+        var result = await _service.ReinstateAsync(Guid.CreateVersion7(), Token);
+
+        result.Succeeded.Should().BeFalse();
+        result.Error!.Code.Should().Be(ErrorCode.ProgramNotFound);
+    }
+
+    [Fact]
+    public async Task Reinstate_RetiredProgram_ReinstatesAndSavesChanges_SecondCallIsIdempotentAndSkipsSave()
+    {
+        var program = _context.SeedProgram();
+        await _service.RetireAsync(program.Id, Token);
+        var savesAfterRetire = _context.SaveChangesCalls;
+
+        var firstResult = await _service.ReinstateAsync(program.Id, Token);
+
+        firstResult.Succeeded.Should().BeTrue();
+        firstResult.Value!.Lifecycle.Should().Be(nameof(ProgramLifecycle.Active));
+        firstResult.Value.CanAcceptStudents.Should().BeTrue();
+        _context.SaveChangesCalls.Should().Be(savesAfterRetire + 1);
+
+        var secondResult = await _service.ReinstateAsync(program.Id, Token);
+
+        secondResult.Succeeded.Should().BeTrue();
+        secondResult.Value!.Lifecycle.Should().Be(nameof(ProgramLifecycle.Active));
+        _context.SaveChangesCalls.Should().Be(savesAfterRetire + 1);
+    }
+
+    [Fact]
+    public async Task Recognise_UnknownId_ReturnsProgramNotFound()
+    {
+        var result = await _service.RecogniseAsync(Guid.CreateVersion7(), Token);
+
+        result.Succeeded.Should().BeFalse();
+        result.Error!.Code.Should().Be(ErrorCode.ProgramNotFound);
+    }
+
+    [Fact]
+    public async Task Recognise_UnrecognisedProgram_RecognisesAndSavesChanges_SecondCallIsIdempotentAndSkipsSave()
+    {
+        var program = _context.SeedProgram(isRegulatorRecognised: false);
+        var initialSaves = _context.SaveChangesCalls;
+
+        var firstResult = await _service.RecogniseAsync(program.Id, Token);
+
+        firstResult.Succeeded.Should().BeTrue();
+        firstResult.Value!.IsRegulatorRecognised.Should().BeTrue();
+        firstResult.Value.CanAcceptStudents.Should().BeTrue();
+        _context.SaveChangesCalls.Should().Be(initialSaves + 1);
+
+        var secondResult = await _service.RecogniseAsync(program.Id, Token);
+
+        secondResult.Succeeded.Should().BeTrue();
+        secondResult.Value!.IsRegulatorRecognised.Should().BeTrue();
+        _context.SaveChangesCalls.Should().Be(initialSaves + 1);
+    }
+
+    [Fact]
+    public async Task WithdrawRecognition_UnknownId_ReturnsProgramNotFound()
+    {
+        var result = await _service.WithdrawRecognitionAsync(Guid.CreateVersion7(), Token);
+
+        result.Succeeded.Should().BeFalse();
+        result.Error!.Code.Should().Be(ErrorCode.ProgramNotFound);
+    }
+
+    [Fact]
+    public async Task WithdrawRecognition_RecognisedProgram_WithdrawsAndSavesChanges_SecondCallIsIdempotentAndSkipsSave()
+    {
+        var program = _context.SeedProgram(isRegulatorRecognised: true);
+        var initialSaves = _context.SaveChangesCalls;
+
+        var firstResult = await _service.WithdrawRecognitionAsync(program.Id, Token);
+
+        firstResult.Succeeded.Should().BeTrue();
+        firstResult.Value!.IsRegulatorRecognised.Should().BeFalse();
+        firstResult.Value.CanAcceptStudents.Should().BeFalse();
+        _context.SaveChangesCalls.Should().Be(initialSaves + 1);
+
+        var secondResult = await _service.WithdrawRecognitionAsync(program.Id, Token);
+
+        secondResult.Succeeded.Should().BeTrue();
+        secondResult.Value!.IsRegulatorRecognised.Should().BeFalse();
+        _context.SaveChangesCalls.Should().Be(initialSaves + 1);
     }
 
     [Fact]

@@ -35,25 +35,75 @@ public sealed class AcademicProgramTests
         return program;
     }
 
-    [Fact]
-    public void Constructor_WithRecognisedProgram_CanAcceptStudents()
-    {
-        var program = CreateProgram(recognise: true);
-
-        program.CanAcceptStudents.Should().BeTrue();
-    }
-
     [Theory]
-    [InlineData(false, ProgramLifecycle.Active)]
-    [InlineData(true, ProgramLifecycle.Retired)]
-    [InlineData(false, ProgramLifecycle.Retired)]
-    public void CanAcceptStudents_WhenEitherConditionFails_IsFalse(
+    [InlineData(true, ProgramLifecycle.Active, true)]
+    [InlineData(false, ProgramLifecycle.Active, false)]
+    [InlineData(true, ProgramLifecycle.Retired, false)]
+    [InlineData(false, ProgramLifecycle.Retired, false)]
+    public void CanAcceptStudents_AllCombinations_MatchesExpected(
         bool recognised,
-        ProgramLifecycle lifecycle)
+        ProgramLifecycle lifecycle,
+        bool expected)
     {
         var program = CreateProgram(recognise: recognised, lifecycle: lifecycle);
 
-        program.CanAcceptStudents.Should().BeFalse();
+        program.CanAcceptStudents.Should().Be(expected);
+    }
+
+    [Fact]
+    public void Retire_WhenActive_SetsRetiredAndReturnsTrue_WhenAlreadyRetired_ReturnsFalse()
+    {
+        var program = CreateProgram(lifecycle: ProgramLifecycle.Active);
+
+        var firstCall = program.Retire();
+        firstCall.Should().BeTrue();
+        program.Lifecycle.Should().Be(ProgramLifecycle.Retired);
+
+        var secondCall = program.Retire();
+        secondCall.Should().BeFalse();
+        program.Lifecycle.Should().Be(ProgramLifecycle.Retired);
+    }
+
+    [Fact]
+    public void Reinstate_WhenRetired_SetsActiveAndReturnsTrue_WhenAlreadyActive_ReturnsFalse()
+    {
+        var program = CreateProgram(lifecycle: ProgramLifecycle.Retired);
+
+        var firstCall = program.Reinstate();
+        firstCall.Should().BeTrue();
+        program.Lifecycle.Should().Be(ProgramLifecycle.Active);
+
+        var secondCall = program.Reinstate();
+        secondCall.Should().BeFalse();
+        program.Lifecycle.Should().Be(ProgramLifecycle.Active);
+    }
+
+    [Fact]
+    public void Recognise_WhenUnrecognised_SetsRecognisedAndReturnsTrue_WhenAlreadyRecognised_ReturnsFalse()
+    {
+        var program = CreateProgram(recognise: false);
+
+        var firstCall = program.Recognise();
+        firstCall.Should().BeTrue();
+        program.IsRegulatorRecognised.Should().BeTrue();
+
+        var secondCall = program.Recognise();
+        secondCall.Should().BeFalse();
+        program.IsRegulatorRecognised.Should().BeTrue();
+    }
+
+    [Fact]
+    public void WithdrawRecognition_WhenRecognised_SetsUnrecognisedAndReturnsTrue_WhenAlreadyUnrecognised_ReturnsFalse()
+    {
+        var program = CreateProgram(recognise: true);
+
+        var firstCall = program.WithdrawRecognition();
+        firstCall.Should().BeTrue();
+        program.IsRegulatorRecognised.Should().BeFalse();
+
+        var secondCall = program.WithdrawRecognition();
+        secondCall.Should().BeFalse();
+        program.IsRegulatorRecognised.Should().BeFalse();
     }
 
     [Fact]
