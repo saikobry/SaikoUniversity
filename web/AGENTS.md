@@ -111,3 +111,8 @@ Keep `columns` and `data` memoized with stable deps, even while a modal is open 
 - `npm --prefix web run dev` — must serve on port 5173 with no console errors
 - With the API running: `http://localhost:5173/` renders the programs table with live data
 - `npm --prefix web run api:generate` — must produce no diff when the API contract has not changed
+
+## Child DOX Index
+
+- `src/features/programs/` — pages, table, modals, hooks for academic programmes
+- `src/features/reference-data/` — query hooks and selector options for lookup tables
