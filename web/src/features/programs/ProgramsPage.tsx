@@ -1,13 +1,18 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Plus, Search } from 'lucide-react';
 
 import type { CreateProgramRequest, ProgramResponse, UpdateProgramRequest } from '@/api/schema.schemas';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Pagination } from '@/components/ui/pagination';
 import { ConfirmProgramActionDialog } from '@/features/programs/ConfirmProgramActionDialog';
 import { CreateProgramModal } from '@/features/programs/CreateProgramModal';
 import { EditProgramModal } from '@/features/programs/EditProgramModal';
 import { ProgramsTable } from '@/features/programs/ProgramsTable';
+import {
+  useProgramFilters,
+  type EnrollmentFilter,
+} from '@/features/programs/useProgramFilters';
 import {
   useCreateProgram,
   usePrograms,
@@ -39,8 +44,7 @@ interface ActionFeedback {
  */
 export function ProgramsPage() {
   renderGuard.check('ProgramsPage');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [acceptingOnly, setAcceptingOnly] = useState(false);
+  const filters = useProgramFilters();
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
@@ -52,7 +56,12 @@ export function ProgramsPage() {
     useState<PendingDestructiveAction | null>(null);
   const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
 
-  const { data, isPending, isError, error, refetch, isFetching } = usePrograms();
+  const { data, isPending, isError, error, refetch, isFetching } = usePrograms({
+    page: filters.page,
+    pageSize: filters.pageSize,
+    search: filters.search,
+    canAcceptStudents: filters.canAcceptStudents,
+  });
   const {
     data: levelsData,
     isPending: levelsPending,
@@ -125,10 +134,13 @@ export function ProgramsPage() {
     setEditingProgram(program);
   }, []);
 
-  const handleClearFilters = useCallback(() => {
-    setSearchTerm('');
-    setAcceptingOnly(false);
-  }, []);
+  // Out-of-bounds page self-healing
+  useEffect(() => {
+    const pageCount = Number(data?.data.pageCount ?? 0);
+    if (pageCount > 0 && filters.page > pageCount) {
+      filters.setPage(pageCount);
+    }
+  }, [data?.data.pageCount, filters.page, filters.setPage]);
 
   // Destructive actions: require confirmation dialog
   const handleInitiateRetire = useCallback((program: ProgramResponse) => {
@@ -285,37 +297,61 @@ export function ProgramsPage() {
       )}
 
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <div className="relative w-full sm:max-w-xs">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search code or title…"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-8"
-          />
-        </div>
+        <div className="flex flex-1 flex-col sm:flex-row items-stretch sm:items-center gap-3">
+          <div className="relative w-full sm:max-w-xs">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search code or title…"
+              value={filters.searchInput}
+              onChange={(e) => filters.setSearchInput(e.target.value)}
+              className="pl-8"
+            />
+          </div>
 
-        <label className="flex items-center gap-2 text-sm text-muted-foreground cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={acceptingOnly}
-            onChange={(e) => setAcceptingOnly(e.target.checked)}
-            className="h-4 w-4 rounded border-input"
-          />
-          <span>Accepting students only</span>
-        </label>
+          <select
+            aria-label="Filter by status"
+            value={filters.enrollmentFilter}
+            onChange={(e) => filters.setEnrollmentFilter(e.target.value as EnrollmentFilter)}
+            className="h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+          >
+            <option value="all">All</option>
+            <option value="accepting">Accepting Students</option>
+            <option value="not-accepting">Not Accepting</option>
+          </select>
+
+          {filters.hasActiveFilters && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={filters.resetFilters}
+              className="h-9 px-3 text-sm"
+            >
+              Clear filters
+            </Button>
+          )}
+        </div>
       </div>
 
       <ProgramsTable
         rows={rows}
-        searchTerm={searchTerm}
-        acceptingOnly={acceptingOnly}
-        onClearFilters={handleClearFilters}
+        isFetching={isFetching}
+        hasActiveFilters={filters.hasActiveFilters}
+        onClearFilters={filters.resetFilters}
         onEdit={handleEdit}
         onRetire={handleInitiateRetire}
         onReinstate={handleReinstate}
         onRecognise={handleRecognise}
         onWithdrawRecognition={handleInitiateWithdrawRecognition}
+      />
+
+      <Pagination
+        page={filters.page}
+        pageSize={filters.pageSize}
+        totalCount={data?.data.totalCount ?? 0}
+        pageCount={data?.data.pageCount ?? 1}
+        onPageChange={filters.setPage}
+        onPageSizeChange={filters.setPageSize}
+        isLoading={isFetching}
       />
 
       <CreateProgramModal

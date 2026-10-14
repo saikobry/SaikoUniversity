@@ -1,4 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { keepPreviousData, useQueryClient } from '@tanstack/react-query';
 
 import {
   getGetApiV1ProgramsQueryKey,
@@ -10,7 +10,14 @@ import {
   usePostApiV1ProgramsIdWithdrawRecognition,
   usePutApiV1ProgramsId,
 } from '@/api';
-import type { GetApiV1ProgramsParams, ProgramResponse } from '@/api/schema.schemas';
+import type { ProgramResponse } from '@/api/schema.schemas';
+
+export interface UseProgramsParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  canAcceptStudents?: boolean;
+}
 
 /**
  * Every data-fetching and mutation hook for the programs slice lives here, not in a component.
@@ -19,12 +26,22 @@ import type { GetApiV1ProgramsParams, ProgramResponse } from '@/api/schema.schem
  * That keeps cache keys in one place and makes the mutation invalidations below the only place
  * that decides what a write should refresh.
  */
-export function usePrograms(params?: GetApiV1ProgramsParams) {
-  return useGetApiV1Programs({
-    page: 1,
-    pageSize: 50,
-    ...params,
-  });
+export function usePrograms(params?: UseProgramsParams) {
+  const { page, pageSize, search, canAcceptStudents } = params ?? {};
+
+  return useGetApiV1Programs(
+    {
+      page,
+      pageSize,
+      search,
+      canAcceptStudents,
+    },
+    {
+      query: {
+        placeholderData: keepPreviousData,
+      },
+    },
+  );
 }
 
 /**

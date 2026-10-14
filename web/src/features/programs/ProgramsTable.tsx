@@ -2,10 +2,9 @@ import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   useReactTable,
 } from '@tanstack/react-table';
-import type { ColumnDef, ColumnFiltersState } from '@tanstack/react-table';
+import type { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
 import { Ban, MoreHorizontal, Pencil, RotateCcw, ShieldAlert, ShieldCheck } from 'lucide-react';
 
@@ -21,11 +20,11 @@ import {
 import { cn } from '@/lib/utils';
 import { renderGuard } from '@/lib/renderGuard';
 
-interface ProgramsTableProps {
+export interface ProgramsTableProps {
   rows: readonly ProgramResponse[];
-  globalFilter?: string;
-  searchTerm?: string;
-  acceptingOnly?: boolean;
+  programs?: readonly ProgramResponse[];
+  isFetching?: boolean;
+  hasActiveFilters?: boolean;
   onClearFilters?: () => void;
   onEdit?: (program: ProgramResponse) => void;
   onRetire?: (program: ProgramResponse) => void;
@@ -36,18 +35,15 @@ interface ProgramsTableProps {
 
 const columnHelper = createColumnHelper<ProgramResponse>();
 
-const canGlobalFilterColumn = (column: { id: string }) =>
-  column.id === 'code' || column.id === 'name';
-
 /**
  * Presentational only. No hooks, no queries, no API calls. Receives rows and action handlers.
- * Sorting and filtering are handled via TanStack Table; the component does not fetch.
+ * The component does not fetch.
  */
 export function ProgramsTable({
   rows,
-  globalFilter,
-  searchTerm,
-  acceptingOnly = false,
+  programs,
+  isFetching = false,
+  hasActiveFilters = false,
   onClearFilters,
   onEdit,
   onRetire,
@@ -65,26 +61,21 @@ export function ProgramsTable({
     () => [
       columnHelper.accessor('code', {
         header: 'Code',
-        enableGlobalFilter: true,
         cell: (info) => <span className="font-mono text-sm">{info.getValue()}</span>,
       }),
       columnHelper.accessor('name', {
         header: 'Program',
-        enableGlobalFilter: true,
         cell: (info) => <span className="font-medium">{info.getValue()}</span>,
       }),
       columnHelper.accessor('departmentName', {
         header: 'Department',
-        enableGlobalFilter: false,
       }),
       columnHelper.accessor('academicLevelCode', {
         header: 'Level',
-        enableGlobalFilter: false,
         cell: (info) => <Badge variant="secondary">{info.getValue()}</Badge>,
       }),
       columnHelper.accessor('regulator', {
         header: 'Regulator',
-        enableGlobalFilter: false,
         cell: (info) => {
           const row = info.row.original;
           return (
@@ -99,12 +90,10 @@ export function ProgramsTable({
       }),
       columnHelper.accessor('requiredCredits', {
         header: 'Credits',
-        enableGlobalFilter: false,
         cell: (info) => <span className="tabular-nums">{info.getValue()}</span>,
       }),
       columnHelper.accessor('lifecycle', {
         header: 'Lifecycle',
-        enableGlobalFilter: false,
         cell: (info) => (
           <Badge variant={info.getValue() === 'Active' ? 'default' : 'outline'}>
             {info.getValue()}
@@ -113,8 +102,6 @@ export function ProgramsTable({
       }),
       columnHelper.accessor('canAcceptStudents', {
         header: 'Accepting',
-        enableGlobalFilter: false,
-        filterFn: 'equals',
         cell: (info) => (
           <span className={cn('text-sm', !info.getValue() && 'text-muted-foreground')}>
             {info.getValue() ? 'Yes' : 'No'}
@@ -123,7 +110,6 @@ export function ProgramsTable({
       }),
       columnHelper.display({
         id: 'actions',
-        enableGlobalFilter: false,
         header: () => <span className="sr-only">Actions</span>,
         cell: (info) => {
           const program = info.row.original;
@@ -213,40 +199,25 @@ export function ProgramsTable({
     [onEdit, onRetire, onReinstate, onRecognise, onWithdrawRecognition],
   );
 
-  const filterText = (globalFilter ?? searchTerm ?? '').trim();
-  const hasActiveFilters = Boolean(filterText || acceptingOnly);
-
-  const columnFilters = useMemo<ColumnFiltersState>(
-    () => (acceptingOnly ? [{ id: 'canAcceptStudents', value: true }] : []),
-    [acceptingOnly],
-  );
-
-  const state = useMemo(
-    () => ({
-      globalFilter: filterText || undefined,
-      columnFilters,
-    }),
-    [filterText, columnFilters],
-  );
-
   // `rows` arrives from the query cache and is already referentially stable. Spreading it into a new
   // array destroyed that stability, which is half of the same loop.
-  const data = useMemo(() => rows, [rows]);
+  const programList = programs ?? rows;
+  const data = useMemo(() => programList, [programList]);
 
   const table = useReactTable({
     data: data as ProgramResponse[],
     columns,
-    state,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-    getColumnCanGlobalFilter: canGlobalFilterColumn,
-    globalFilterFn: 'includesString',
   });
 
-  if (table.getRowModel().rows.length === 0) {
+  if (data.length === 0) {
     return (
       <div className="rounded-lg border border-dashed p-8 text-center">
-        <p className="text-muted-foreground text-sm">No programs match this view.</p>
+        <p className="text-muted-foreground text-sm">
+          {hasActiveFilters
+            ? 'No programs match your current filters.'
+            : 'No academic programs found.'}
+        </p>
         {hasActiveFilters && onClearFilters && (
           <Button
             variant="link"
@@ -262,7 +233,12 @@ export function ProgramsTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border">
+    <div
+      className={cn(
+        'overflow-hidden rounded-lg border transition-opacity duration-200',
+        isFetching && 'opacity-60',
+      )}
+    >
       <table className="w-full border-collapse text-sm">
         <thead className="bg-muted/50">
           {table.getHeaderGroups().map((headerGroup) => (

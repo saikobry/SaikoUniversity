@@ -87,6 +87,14 @@ A dialog opens on top of the same tree as the table. If that parent re-render ma
 `data` change identity, TanStack re-enters its row model and can loop until the renderer dies.
 Keep `columns` and `data` memoized with stable deps, even while a modal is open over the table.
 
+### URL search params and routing
+
+- Route search parameter validation uses TanStack Router's native `validateSearch` function with
+  plain TypeScript validation (no runtime schema library dependencies like Zod).
+- Query keys and multi-word enum values in URLs use kebab-case (e.g. `not-accepting`).
+- Clean URLs: default parameter values (`page=1`, default page size, empty filters) are omitted
+  from the URL query string.
+
 ### Conventions
 
 - `cn()` from `@/lib/utils` in every `className`. Never concatenate class strings.
