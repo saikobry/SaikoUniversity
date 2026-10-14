@@ -235,11 +235,11 @@ export function ProgramsTable({
   return (
     <div
       className={cn(
-        'overflow-hidden rounded-lg border transition-opacity duration-200',
+        'overflow-x-auto rounded-lg border transition-opacity duration-200',
         isFetching && 'opacity-60',
       )}
     >
-      <table className="w-full border-collapse text-sm">
+      <table className="w-full min-w-[750px] border-collapse text-sm">
         <thead className="bg-muted/50">
           {table.getHeaderGroups().map((headerGroup) => (
             <tr key={headerGroup.id} className="border-b">
