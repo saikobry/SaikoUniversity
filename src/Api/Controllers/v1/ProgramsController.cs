@@ -20,12 +20,12 @@ public sealed class ProgramsController(ProgramService programs) : ControllerBase
         [FromQuery] string? search,
         [FromQuery] Guid? academicLevelId,
         [FromQuery] Guid? departmentId,
-        [FromQuery] bool? canAcceptStudentsOnly,
+        [FromQuery] bool? canAcceptStudents,
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 25,
         CancellationToken cancellationToken = default)
     {
-        var filter = new ProgramFilter(search, academicLevelId, departmentId, canAcceptStudentsOnly, page, pageSize);
+        var filter = new ProgramFilter(search, academicLevelId, departmentId, canAcceptStudents, page, pageSize);
 
         var result = await programs.GetAllAsync(filter, cancellationToken);
 

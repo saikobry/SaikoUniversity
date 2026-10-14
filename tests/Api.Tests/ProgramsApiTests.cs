@@ -301,6 +301,28 @@ public sealed class ProgramsApiTests(ApiFactory factory) : IClassFixture<ApiFact
     }
 
     [Fact]
+    public async Task GetAll_CanAcceptStudentsFalse_Returns200WithNonAcceptingPrograms()
+    {
+        await _client.PostAsJsonAsync("/api/v1/programs", ValidPayload(), TestContext.Current.CancellationToken);
+
+        var unrecognisedResponse = await _client.PostAsJsonAsync(
+            "/api/v1/programs",
+            ValidPayload() with { IsRegulatorRecognised = false },
+            TestContext.Current.CancellationToken);
+        var unrecognised = await unrecognisedResponse.Content.ReadFromJsonAsync<ProgramResponse>(TestContext.Current.CancellationToken);
+
+        var response = await _client.GetAsync("/api/v1/programs?canAcceptStudents=false", TestContext.Current.CancellationToken);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var body = await response.Content.ReadFromJsonAsync<ProgramListResponse>(TestContext.Current.CancellationToken);
+        body.Should().NotBeNull();
+        body!.Items.Should().NotBeEmpty();
+        body.Items.Should().OnlyContain(x => !x.CanAcceptStudents);
+        body.Items.Should().Contain(x => x.Id == unrecognised!.Id);
+    }
+
+    [Fact]
     public async Task Factory_UsesInMemoryNotTheDevelopmentDatabase()
     {
         // Guards the seam itself. If the removal of the SqlServer provider stops working — an EF

@@ -383,14 +383,29 @@ public sealed class ProgramServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task GetAll_CanAcceptStudentsOnly_ExcludesUnrecognisedPrograms()
+    public async Task GetAll_CanAcceptStudentsTrue_ExcludesUnrecognisedPrograms()
     {
         _context.SeedProgram(code: "AAA", isRegulatorRecognised: true);
         _context.SeedProgram(code: "BBB", isRegulatorRecognised: false);
 
-        var result = await _service.GetAllAsync(new ProgramFilter(CanAcceptStudentsOnly: true), Token);
+        var result = await _service.GetAllAsync(new ProgramFilter(CanAcceptStudents: true), Token);
 
         result.Items.Should().ContainSingle().Which.Code.Should().Be("AAA");
+    }
+
+    [Fact]
+    public async Task GetAll_CanAcceptStudentsFalse_ReturnsOnlyProgramsThatCannotAcceptStudents()
+    {
+        _context.SeedProgram(code: "AAA", isRegulatorRecognised: true);
+        _context.SeedProgram(code: "BBB", isRegulatorRecognised: false);
+        var retired = _context.SeedProgram(code: "CCC", isRegulatorRecognised: true);
+        retired.Retire();
+        _context.SaveChanges();
+
+        var result = await _service.GetAllAsync(new ProgramFilter(CanAcceptStudents: false), Token);
+
+        result.Items.Select(x => x.Code).Should().BeEquivalentTo(["BBB", "CCC"]);
+        result.Items.Should().AllSatisfy(x => x.CanAcceptStudents.Should().BeFalse());
     }
 
     [Fact]

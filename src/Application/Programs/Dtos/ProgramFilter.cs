@@ -7,7 +7,7 @@ public sealed record ProgramFilter(
     string? Search = null,
     Guid? AcademicLevelId = null,
     Guid? DepartmentId = null,
-    bool? CanAcceptStudentsOnly = null,
+    bool? CanAcceptStudents = null,
     int Page = 1,
     int PageSize = 25)
 {

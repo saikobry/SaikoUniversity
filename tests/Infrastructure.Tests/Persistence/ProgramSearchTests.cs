@@ -193,7 +193,7 @@ public sealed class ProgramSearchTests : IAsyncLifetime
 
         // "B" matches all four codes; only the recognised one may survive the second filter.
         var result = await _service.GetAllAsync(
-            new ProgramFilter(Search: "B", CanAcceptStudentsOnly: true),
+            new ProgramFilter(Search: "B", CanAcceptStudents: true),
             TestContext.Current.CancellationToken);
 
         result.Items.Select(x => x.Code).Should().BeEquivalentTo(["BSCS", "BSIT"]);

@@ -49,9 +49,11 @@ public sealed class ProgramService(IAppDbContext context)
             query = query.Where(x => x.DepartmentId == departmentId);
         }
 
-        if (normalised.CanAcceptStudentsOnly == true)
+        if (normalised.CanAcceptStudents is { } canAcceptStudents)
         {
-            query = query.Where(x => x.IsRegulatorRecognised && x.Lifecycle == ProgramLifecycle.Active);
+            query = canAcceptStudents
+                ? query.Where(x => x.IsRegulatorRecognised && x.Lifecycle == ProgramLifecycle.Active)
+                : query.Where(x => !x.IsRegulatorRecognised || x.Lifecycle != ProgramLifecycle.Active);
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
