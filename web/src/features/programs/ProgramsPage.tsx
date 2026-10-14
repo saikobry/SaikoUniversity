@@ -4,12 +4,34 @@ import { Plus, Search } from 'lucide-react';
 import type { CreateProgramRequest, ProgramResponse, UpdateProgramRequest } from '@/api/schema.schemas';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { ConfirmProgramActionDialog } from '@/features/programs/ConfirmProgramActionDialog';
 import { CreateProgramModal } from '@/features/programs/CreateProgramModal';
 import { EditProgramModal } from '@/features/programs/EditProgramModal';
 import { ProgramsTable } from '@/features/programs/ProgramsTable';
-import { useCreateProgram, usePrograms, useUpdateProgram } from '@/features/programs/usePrograms';
+import {
+  useCreateProgram,
+  usePrograms,
+  useRecogniseProgram,
+  useReinstateProgram,
+  useRetireProgram,
+  useUpdateProgram,
+  useWithdrawRecognitionProgram,
+} from '@/features/programs/usePrograms';
 import { useAcademicLevels, useDepartments } from '@/features/reference-data/useReferenceData';
+import { cn } from '@/lib/utils';
 import { renderGuard } from '@/lib/renderGuard';
+
+type DestructiveActionType = 'retire' | 'withdrawRecognition';
+
+interface PendingDestructiveAction {
+  type: DestructiveActionType;
+  program: ProgramResponse;
+}
+
+interface ActionFeedback {
+  type: 'success' | 'error';
+  message: string;
+}
 
 /**
  * Route component. Owns loading, error, and modal orchestration, then delegates
@@ -26,6 +48,10 @@ export function ProgramsPage() {
   const [editingProgram, setEditingProgram] = useState<ProgramResponse | null>(null);
   const [editError, setEditError] = useState<string | null>(null);
 
+  const [pendingDestructiveAction, setPendingDestructiveAction] =
+    useState<PendingDestructiveAction | null>(null);
+  const [actionFeedback, setActionFeedback] = useState<ActionFeedback | null>(null);
+
   const { data, isPending, isError, error, refetch, isFetching } = usePrograms();
   const {
     data: levelsData,
@@ -40,6 +66,10 @@ export function ProgramsPage() {
 
   const createMutation = useCreateProgram();
   const updateMutation = useUpdateProgram();
+  const retireMutation = useRetireProgram();
+  const reinstateMutation = useReinstateProgram();
+  const recogniseMutation = useRecogniseProgram();
+  const withdrawRecognitionMutation = useWithdrawRecognitionProgram();
 
   const rows = useMemo(() => data?.data.items ?? [], [data]);
   const total = Number(data?.data.totalCount ?? 0);
@@ -67,6 +97,10 @@ export function ProgramsPage() {
     try {
       await createMutation.mutateAsync({ data: request });
       setIsCreateOpen(false);
+      setActionFeedback({
+        type: 'success',
+        message: `Program ${request.code} created successfully.`,
+      });
     } catch (err) {
       setCreateError(err instanceof Error ? err.message : 'Could not create program.');
     }
@@ -77,6 +111,10 @@ export function ProgramsPage() {
     try {
       await updateMutation.mutateAsync({ id, data: request });
       setEditingProgram(null);
+      setActionFeedback({
+        type: 'success',
+        message: 'Program updated successfully.',
+      });
     } catch (err) {
       setEditError(err instanceof Error ? err.message : 'Could not update program.');
     }
@@ -92,30 +130,87 @@ export function ProgramsPage() {
     setAcceptingOnly(false);
   }, []);
 
-  const handleToggleRetire = useCallback(
-    async (program: ProgramResponse) => {
-      const isRetired = program.lifecycle === 'Retired';
-      const actionLabel = isRetired ? 'reinstate' : 'retire';
-      if (!window.confirm(`Are you sure you want to ${actionLabel} ${program.code}?`)) {
-        return;
-      }
+  // Destructive actions: require confirmation dialog
+  const handleInitiateRetire = useCallback((program: ProgramResponse) => {
+    setActionFeedback(null);
+    setPendingDestructiveAction({ type: 'retire', program });
+  }, []);
 
+  const handleInitiateWithdrawRecognition = useCallback((program: ProgramResponse) => {
+    setActionFeedback(null);
+    setPendingDestructiveAction({ type: 'withdrawRecognition', program });
+  }, []);
+
+  // Restorative actions: execute immediately without dialog confirmation
+  const handleReinstate = useCallback(
+    async (program: ProgramResponse) => {
+      setActionFeedback(null);
       try {
-        await updateMutation.mutateAsync({
-          id: program.id,
-          data: {
-            name: program.name,
-            requiredCredits: program.requiredCredits,
-            isRegulatorRecognised: program.isRegulatorRecognised,
-            isRetired: !isRetired,
-          },
+        await reinstateMutation.mutateAsync({ id: program.id });
+        setActionFeedback({
+          type: 'success',
+          message: `Program ${program.code} has been reinstated to Active status.`,
         });
       } catch (err) {
-        alert(`Could not update lifecycle: ${err instanceof Error ? err.message : 'Unknown error.'}`);
+        setActionFeedback({
+          type: 'error',
+          message:
+            err instanceof Error ? err.message : `Failed to reinstate program ${program.code}.`,
+        });
       }
     },
-    [updateMutation],
+    [reinstateMutation],
   );
+
+  const handleRecognise = useCallback(
+    async (program: ProgramResponse) => {
+      setActionFeedback(null);
+      try {
+        await recogniseMutation.mutateAsync({ id: program.id });
+        setActionFeedback({
+          type: 'success',
+          message: `Program ${program.code} is now marked as recognized by ${program.regulator || 'the regulator'}.`,
+        });
+      } catch (err) {
+        setActionFeedback({
+          type: 'error',
+          message:
+            err instanceof Error ? err.message : `Failed to recognise program ${program.code}.`,
+        });
+      }
+    },
+    [recogniseMutation],
+  );
+
+  const handleConfirmDestructiveAction = async () => {
+    if (!pendingDestructiveAction) return;
+    const { type, program } = pendingDestructiveAction;
+    try {
+      if (type === 'retire') {
+        await retireMutation.mutateAsync({ id: program.id });
+        setActionFeedback({
+          type: 'success',
+          message: `Program ${program.code} has been retired. Student admissions are halted.`,
+        });
+      } else {
+        await withdrawRecognitionMutation.mutateAsync({ id: program.id });
+        setActionFeedback({
+          type: 'success',
+          message: `Regulator recognition for program ${program.code} has been withdrawn.`,
+        });
+      }
+      setPendingDestructiveAction(null);
+    } catch (err) {
+      setActionFeedback({
+        type: 'error',
+        message:
+          err instanceof Error
+            ? err.message
+            : `Failed to execute action for program ${program.code}.`,
+      });
+      setPendingDestructiveAction(null);
+    }
+  };
 
   // Only bail out when there is genuinely nothing to render yet. Typing in the search box changes the
   // query key, which puts React Query into a fresh pending state for that key, so this branch used to
@@ -136,6 +231,9 @@ export function ProgramsPage() {
       </div>
     );
   }
+
+  const isDestructivePending =
+    retireMutation.isPending || withdrawRecognitionMutation.isPending;
 
   return (
     <div className="space-y-6">
@@ -162,6 +260,27 @@ export function ProgramsPage() {
       {(levelsError || departmentsError) && (
         <div className="rounded-md border border-destructive/50 bg-destructive/10 p-3 text-destructive text-sm" role="alert">
           Could not load reference data (academic levels or departments). Creating new programs is unavailable.
+        </div>
+      )}
+
+      {actionFeedback && (
+        <div
+          className={cn(
+            'flex items-center justify-between rounded-md border p-3 text-sm',
+            actionFeedback.type === 'success'
+              ? 'border-primary/20 bg-primary/5 text-primary'
+              : 'border-destructive/30 bg-destructive/10 text-destructive',
+          )}
+          role={actionFeedback.type === 'error' ? 'alert' : 'status'}
+        >
+          <span>{actionFeedback.message}</span>
+          <button
+            type="button"
+            onClick={() => setActionFeedback(null)}
+            className="text-xs hover:underline cursor-pointer font-medium ml-4"
+          >
+            Dismiss
+          </button>
         </div>
       )}
 
@@ -193,7 +312,10 @@ export function ProgramsPage() {
         acceptingOnly={acceptingOnly}
         onClearFilters={handleClearFilters}
         onEdit={handleEdit}
-        onToggleRetire={handleToggleRetire}
+        onRetire={handleInitiateRetire}
+        onReinstate={handleReinstate}
+        onRecognise={handleRecognise}
+        onWithdrawRecognition={handleInitiateWithdrawRecognition}
       />
 
       <CreateProgramModal
@@ -213,6 +335,31 @@ export function ProgramsPage() {
         onSubmit={handleUpdate}
         isSubmitting={updateMutation.isPending}
         errorMessage={editError}
+      />
+
+      <ConfirmProgramActionDialog
+        open={pendingDestructiveAction !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDestructiveAction(null);
+        }}
+        title={
+          pendingDestructiveAction?.type === 'retire'
+            ? `Retire Program: ${pendingDestructiveAction.program.code}`
+            : `Withdraw Recognition: ${pendingDestructiveAction?.program.code}`
+        }
+        description={
+          pendingDestructiveAction?.type === 'retire'
+            ? `Retiring this program halts all future student admissions and transitions its lifecycle to Retired. Existing enrolled students remain on record. Are you sure you want to retire "${pendingDestructiveAction.program.name}"?`
+            : `Withdrawing regulator recognition marks this program as unrecognised and immediately halts new student admissions. Are you sure you want to withdraw recognition from "${pendingDestructiveAction?.program.name}"?`
+        }
+        confirmLabel={
+          pendingDestructiveAction?.type === 'retire'
+            ? 'Retire Program'
+            : 'Withdraw Recognition'
+        }
+        variant="destructive"
+        isPending={isDestructivePending}
+        onConfirm={handleConfirmDestructiveAction}
       />
     </div>
   );

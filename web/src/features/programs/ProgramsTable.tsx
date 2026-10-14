@@ -7,11 +7,17 @@ import {
 } from '@tanstack/react-table';
 import type { ColumnDef, ColumnFiltersState } from '@tanstack/react-table';
 import { useMemo } from 'react';
-import { Pencil, RotateCcw, Ban } from 'lucide-react';
+import { Ban, MoreHorizontal, Pencil, RotateCcw, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 import type { ProgramResponse } from '@/api/schema.schemas';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
 import { renderGuard } from '@/lib/renderGuard';
 
@@ -22,7 +28,10 @@ interface ProgramsTableProps {
   acceptingOnly?: boolean;
   onClearFilters?: () => void;
   onEdit?: (program: ProgramResponse) => void;
-  onToggleRetire?: (program: ProgramResponse) => void;
+  onRetire?: (program: ProgramResponse) => void;
+  onReinstate?: (program: ProgramResponse) => void;
+  onRecognise?: (program: ProgramResponse) => void;
+  onWithdrawRecognition?: (program: ProgramResponse) => void;
 }
 
 const columnHelper = createColumnHelper<ProgramResponse>();
@@ -41,7 +50,10 @@ export function ProgramsTable({
   acceptingOnly = false,
   onClearFilters,
   onEdit,
-  onToggleRetire,
+  onRetire,
+  onReinstate,
+  onRecognise,
+  onWithdrawRecognition,
 }: ProgramsTableProps) {
   renderGuard.check('ProgramsTable');
 
@@ -73,9 +85,17 @@ export function ProgramsTable({
       columnHelper.accessor('regulator', {
         header: 'Regulator',
         enableGlobalFilter: false,
-        cell: (info) => (
-          <span className="text-muted-foreground text-sm">{info.getValue() ?? '—'}</span>
-        ),
+        cell: (info) => {
+          const row = info.row.original;
+          return (
+            <div className="flex flex-col">
+              <span className="text-muted-foreground text-sm">{info.getValue() ?? '—'}</span>
+              <span className="text-xs text-muted-foreground">
+                {row.isRegulatorRecognised ? 'Recognised' : 'Unrecognised'}
+              </span>
+            </div>
+          );
+        },
       }),
       columnHelper.accessor('requiredCredits', {
         header: 'Credits',
@@ -108,6 +128,7 @@ export function ProgramsTable({
         cell: (info) => {
           const program = info.row.original;
           const isRetired = program.lifecycle === 'Retired';
+          const isRecognised = program.isRegulatorRecognised;
 
           return (
             <div className="flex items-center justify-end gap-1">
@@ -123,38 +144,73 @@ export function ProgramsTable({
                   Edit
                 </Button>
               )}
-              {onToggleRetire && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onToggleRetire(program)}
-                  className={cn(
-                    'h-8 px-2 text-xs',
-                    isRetired
-                      ? 'text-foreground hover:bg-accent'
-                      : 'text-destructive hover:bg-destructive/10',
-                  )}
-                  title={isRetired ? 'Reinstate program' : 'Retire program'}
-                >
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8"
+                    title="More actions"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                    <span className="sr-only">Open actions menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
                   {isRetired ? (
-                    <>
-                      <RotateCcw className="h-3.5 w-3.5 mr-1" />
-                      Reinstate
-                    </>
+                    <DropdownMenuItem
+                      onClick={() => onReinstate?.(program)}
+                      className="cursor-pointer"
+                    >
+                      <RotateCcw className="mr-2 h-4 w-4" />
+                      <span>Reinstate</span>
+                    </DropdownMenuItem>
                   ) : (
-                    <>
-                      <Ban className="h-3.5 w-3.5 mr-1" />
-                      Retire
-                    </>
+                    <DropdownMenuItem
+                      onClick={() => onRetire?.(program)}
+                      className="cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      <Ban className="mr-2 h-4 w-4" />
+                      <span>Retire</span>
+                    </DropdownMenuItem>
                   )}
-                </Button>
-              )}
+                  {isRecognised ? (
+                    <DropdownMenuItem
+                      onClick={() => onWithdrawRecognition?.(program)}
+                      className="cursor-pointer text-destructive focus:text-destructive"
+                    >
+                      <ShieldAlert className="mr-2 h-4 w-4" />
+                      <span>Withdraw Recognition</span>
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem
+                      disabled={isRetired}
+                      onClick={() => {
+                        if (!isRetired) {
+                          onRecognise?.(program);
+                        }
+                      }}
+                      className={cn(
+                        'cursor-pointer',
+                        isRetired && 'cursor-not-allowed opacity-50',
+                      )}
+                      title={isRetired ? 'Retired programs cannot be recognised' : undefined}
+                    >
+                      <ShieldCheck className="mr-2 h-4 w-4" />
+                      <span>Recognise</span>
+                      {isRetired && (
+                        <span className="ml-auto text-xs text-muted-foreground">(Retired)</span>
+                      )}
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           );
         },
       }),
     ],
-    [onEdit, onToggleRetire],
+    [onEdit, onRetire, onReinstate, onRecognise, onWithdrawRecognition],
   );
 
   const filterText = (globalFilter ?? searchTerm ?? '').trim();
