@@ -66,7 +66,7 @@ export type GetApiV1ProgramsParams = {
 search?: string;
 academicLevelId?: string;
 departmentId?: string;
-canAcceptStudentsOnly?: boolean;
+canAcceptStudents?: boolean;
 /**
  * @pattern ^-?(?:0|[1-9]\d*)$
  */
@@ -76,3 +76,4 @@ page?: number | string;
  */
 pageSize?: number | string;
 };
+

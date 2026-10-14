@@ -251,3 +251,9 @@ export function useGetApiV1ReferenceDataDepartments<TData = Awaited<ReturnType<t
 
   return withQueryKey(query, queryOptions.queryKey);
 }
+
+
+
+
+
+
