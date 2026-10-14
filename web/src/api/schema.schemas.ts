@@ -60,8 +60,6 @@ export interface UpdateProgramRequest {
   name: string;
   /** @pattern ^-?(?:0|[1-9]\d*)$ */
   requiredCredits: number | string;
-  isRegulatorRecognised: boolean;
-  isRetired: boolean;
 }
 
 export type GetApiV1ProgramsParams = {

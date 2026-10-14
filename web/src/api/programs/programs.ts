@@ -491,3 +491,347 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       > => {
       return useMutation(getPutApiV1ProgramsIdMutationOptions(options), queryClient);
     }
+    export type postApiV1ProgramsIdRetireResponse200 = {
+  data: ProgramResponse
+  status: 200
+}
+
+export type postApiV1ProgramsIdRetireResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type postApiV1ProgramsIdRetireResponseSuccess = (postApiV1ProgramsIdRetireResponse200) & {
+  headers: Headers;
+};
+export type postApiV1ProgramsIdRetireResponseError = (postApiV1ProgramsIdRetireResponse404) & {
+  headers: Headers;
+};
+
+export type postApiV1ProgramsIdRetireResponse = (postApiV1ProgramsIdRetireResponseSuccess | postApiV1ProgramsIdRetireResponseError)
+
+export const getPostApiV1ProgramsIdRetireUrl = (id: string,) => {
+
+
+
+
+  return `/api/v1/programs/${id}/retire`
+}
+
+export const postApiV1ProgramsIdRetire = async (id: string, options?: Parameters<typeof customInstance>[1]): Promise<postApiV1ProgramsIdRetireResponse> => {
+
+  return customInstance<postApiV1ProgramsIdRetireResponse>(getPostApiV1ProgramsIdRetireUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPostApiV1ProgramsIdRetireMutationKey = () => ['postApiV1ProgramsIdRetire'] as const;
+
+export const getPostApiV1ProgramsIdRetireMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ProgramsIdRetire>>, TError,PostApiV1ProgramsIdRetireMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1ProgramsIdRetire>>, TError,PostApiV1ProgramsIdRetireMutationVariables, TContext> => {
+
+const mutationKey = getPostApiV1ProgramsIdRetireMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1ProgramsIdRetire>>, PostApiV1ProgramsIdRetireMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  postApiV1ProgramsIdRetire(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1ProgramsIdRetireMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1ProgramsIdRetire>>>
+
+    export type PostApiV1ProgramsIdRetireMutationError = ErrorResponse
+    export type PostApiV1ProgramsIdRetireMutationVariables = {id: string}
+
+    export const usePostApiV1ProgramsIdRetire = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ProgramsIdRetire>>, TError,PostApiV1ProgramsIdRetireMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1ProgramsIdRetire>>,
+        TError,
+        PostApiV1ProgramsIdRetireMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiV1ProgramsIdRetireMutationOptions(options), queryClient);
+    }
+    export type postApiV1ProgramsIdReinstateResponse200 = {
+  data: ProgramResponse
+  status: 200
+}
+
+export type postApiV1ProgramsIdReinstateResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type postApiV1ProgramsIdReinstateResponseSuccess = (postApiV1ProgramsIdReinstateResponse200) & {
+  headers: Headers;
+};
+export type postApiV1ProgramsIdReinstateResponseError = (postApiV1ProgramsIdReinstateResponse404) & {
+  headers: Headers;
+};
+
+export type postApiV1ProgramsIdReinstateResponse = (postApiV1ProgramsIdReinstateResponseSuccess | postApiV1ProgramsIdReinstateResponseError)
+
+export const getPostApiV1ProgramsIdReinstateUrl = (id: string,) => {
+
+
+
+
+  return `/api/v1/programs/${id}/reinstate`
+}
+
+export const postApiV1ProgramsIdReinstate = async (id: string, options?: Parameters<typeof customInstance>[1]): Promise<postApiV1ProgramsIdReinstateResponse> => {
+
+  return customInstance<postApiV1ProgramsIdReinstateResponse>(getPostApiV1ProgramsIdReinstateUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPostApiV1ProgramsIdReinstateMutationKey = () => ['postApiV1ProgramsIdReinstate'] as const;
+
+export const getPostApiV1ProgramsIdReinstateMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ProgramsIdReinstate>>, TError,PostApiV1ProgramsIdReinstateMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1ProgramsIdReinstate>>, TError,PostApiV1ProgramsIdReinstateMutationVariables, TContext> => {
+
+const mutationKey = getPostApiV1ProgramsIdReinstateMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1ProgramsIdReinstate>>, PostApiV1ProgramsIdReinstateMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  postApiV1ProgramsIdReinstate(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1ProgramsIdReinstateMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1ProgramsIdReinstate>>>
+
+    export type PostApiV1ProgramsIdReinstateMutationError = ErrorResponse
+    export type PostApiV1ProgramsIdReinstateMutationVariables = {id: string}
+
+    export const usePostApiV1ProgramsIdReinstate = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ProgramsIdReinstate>>, TError,PostApiV1ProgramsIdReinstateMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1ProgramsIdReinstate>>,
+        TError,
+        PostApiV1ProgramsIdReinstateMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiV1ProgramsIdReinstateMutationOptions(options), queryClient);
+    }
+    export type postApiV1ProgramsIdRecogniseResponse200 = {
+  data: ProgramResponse
+  status: 200
+}
+
+export type postApiV1ProgramsIdRecogniseResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type postApiV1ProgramsIdRecogniseResponseSuccess = (postApiV1ProgramsIdRecogniseResponse200) & {
+  headers: Headers;
+};
+export type postApiV1ProgramsIdRecogniseResponseError = (postApiV1ProgramsIdRecogniseResponse404) & {
+  headers: Headers;
+};
+
+export type postApiV1ProgramsIdRecogniseResponse = (postApiV1ProgramsIdRecogniseResponseSuccess | postApiV1ProgramsIdRecogniseResponseError)
+
+export const getPostApiV1ProgramsIdRecogniseUrl = (id: string,) => {
+
+
+
+
+  return `/api/v1/programs/${id}/recognise`
+}
+
+export const postApiV1ProgramsIdRecognise = async (id: string, options?: Parameters<typeof customInstance>[1]): Promise<postApiV1ProgramsIdRecogniseResponse> => {
+
+  return customInstance<postApiV1ProgramsIdRecogniseResponse>(getPostApiV1ProgramsIdRecogniseUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPostApiV1ProgramsIdRecogniseMutationKey = () => ['postApiV1ProgramsIdRecognise'] as const;
+
+export const getPostApiV1ProgramsIdRecogniseMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ProgramsIdRecognise>>, TError,PostApiV1ProgramsIdRecogniseMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1ProgramsIdRecognise>>, TError,PostApiV1ProgramsIdRecogniseMutationVariables, TContext> => {
+
+const mutationKey = getPostApiV1ProgramsIdRecogniseMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1ProgramsIdRecognise>>, PostApiV1ProgramsIdRecogniseMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  postApiV1ProgramsIdRecognise(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1ProgramsIdRecogniseMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1ProgramsIdRecognise>>>
+
+    export type PostApiV1ProgramsIdRecogniseMutationError = ErrorResponse
+    export type PostApiV1ProgramsIdRecogniseMutationVariables = {id: string}
+
+    export const usePostApiV1ProgramsIdRecognise = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ProgramsIdRecognise>>, TError,PostApiV1ProgramsIdRecogniseMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1ProgramsIdRecognise>>,
+        TError,
+        PostApiV1ProgramsIdRecogniseMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiV1ProgramsIdRecogniseMutationOptions(options), queryClient);
+    }
+    export type postApiV1ProgramsIdWithdrawRecognitionResponse200 = {
+  data: ProgramResponse
+  status: 200
+}
+
+export type postApiV1ProgramsIdWithdrawRecognitionResponse404 = {
+  data: ErrorResponse
+  status: 404
+}
+
+export type postApiV1ProgramsIdWithdrawRecognitionResponseSuccess = (postApiV1ProgramsIdWithdrawRecognitionResponse200) & {
+  headers: Headers;
+};
+export type postApiV1ProgramsIdWithdrawRecognitionResponseError = (postApiV1ProgramsIdWithdrawRecognitionResponse404) & {
+  headers: Headers;
+};
+
+export type postApiV1ProgramsIdWithdrawRecognitionResponse = (postApiV1ProgramsIdWithdrawRecognitionResponseSuccess | postApiV1ProgramsIdWithdrawRecognitionResponseError)
+
+export const getPostApiV1ProgramsIdWithdrawRecognitionUrl = (id: string,) => {
+
+
+
+
+  return `/api/v1/programs/${id}/withdraw-recognition`
+}
+
+export const postApiV1ProgramsIdWithdrawRecognition = async (id: string, options?: Parameters<typeof customInstance>[1]): Promise<postApiV1ProgramsIdWithdrawRecognitionResponse> => {
+
+  return customInstance<postApiV1ProgramsIdWithdrawRecognitionResponse>(getPostApiV1ProgramsIdWithdrawRecognitionUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getPostApiV1ProgramsIdWithdrawRecognitionMutationKey = () => ['postApiV1ProgramsIdWithdrawRecognition'] as const;
+
+export const getPostApiV1ProgramsIdWithdrawRecognitionMutationOptions = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ProgramsIdWithdrawRecognition>>, TError,PostApiV1ProgramsIdWithdrawRecognitionMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postApiV1ProgramsIdWithdrawRecognition>>, TError,PostApiV1ProgramsIdWithdrawRecognitionMutationVariables, TContext> => {
+
+const mutationKey = getPostApiV1ProgramsIdWithdrawRecognitionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postApiV1ProgramsIdWithdrawRecognition>>, PostApiV1ProgramsIdWithdrawRecognitionMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  postApiV1ProgramsIdWithdrawRecognition(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type PostApiV1ProgramsIdWithdrawRecognitionMutationResult = NonNullable<Awaited<ReturnType<typeof postApiV1ProgramsIdWithdrawRecognition>>>
+
+    export type PostApiV1ProgramsIdWithdrawRecognitionMutationError = ErrorResponse
+    export type PostApiV1ProgramsIdWithdrawRecognitionMutationVariables = {id: string}
+
+    export const usePostApiV1ProgramsIdWithdrawRecognition = <TError = ErrorResponse,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postApiV1ProgramsIdWithdrawRecognition>>, TError,PostApiV1ProgramsIdWithdrawRecognitionMutationVariables, TContext>, request?: SecondParameter<typeof customInstance>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof postApiV1ProgramsIdWithdrawRecognition>>,
+        TError,
+        PostApiV1ProgramsIdWithdrawRecognitionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getPostApiV1ProgramsIdWithdrawRecognitionMutationOptions(options), queryClient);
+    }
